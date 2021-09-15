@@ -25,6 +25,7 @@ SOURCES += \
 HEADERS += \
     enemy.h \
     gamescene.h \
+    header.h \
     mainwindow.h \
     tower.h
 

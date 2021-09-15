@@ -1,6 +1,7 @@
 #ifndef TOWER_H
 #define TOWER_H
 
+#include "header.h"
 
 class Tower
 {
@@ -8,15 +9,20 @@ public:
     Tower();
 };
 
-class TowerClose : public Tower
+class FriendlyUnit
+{
+public:
+    enum Type{Guard, Miner};
+};
+
+class ArrowTower : public Tower
 {
 public:
 
 };
 
-class TowerRanged : public Tower
+class GuardTower : public Tower
 {
-public:
 
 };
 
