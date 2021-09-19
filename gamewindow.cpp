@@ -112,28 +112,28 @@ Cell *GameWindow::Locate(QLabel *src)
     return cells[r][c];
 }
 
-Direction GameWindow::FindPath(int r, int c, int srcType)
+Direction GameWindow::FindPath(int r, int c, int srcType, Direction preDir)
 {
-    if(r>0 && (cells[r-1][c]->GetCellTypeID() & srcType * 0xf))
+    if(r>0 && (cells[r-1][c]->GetCellTypeID() & srcType & 0xf) && preDir != Direction::Down)
         return Direction::Up;
-    if(r<row-1 && (cells[r+1][c]->GetCellTypeID() & srcType & 0xf))
+    if(r<row-1 && (cells[r+1][c]->GetCellTypeID() & srcType & 0xf) && preDir != Direction::Up)
         return Direction::Down;
-    if(c>0 && (cells[r][c-1]->GetCellTypeID() & srcType & 0xf))
+    if(c>0 && (cells[r][c-1]->GetCellTypeID() & srcType & 0xf) && preDir != Direction::Right)
         return Direction::Left;
-    if(c<col-1 && (cells[r][c+1]->GetCellTypeID() & srcType & 0xf))
+    if(c<col-1 && (cells[r][c+1]->GetCellTypeID() & srcType & 0xf) && preDir != Direction::Left)
         return Direction::Right;
     return Direction::None;
 }
 
-Cell *GameWindow::FindNextCell(int r, int c, int srcType)
+Cell *GameWindow::FindNextCell(int r, int c, int srcType, Direction preDir)
 {
-    if(r>0 && (cells[r-1][c]->GetCellTypeID() & srcType & 0xf))
+    if(r>0 && (cells[r-1][c]->GetCellTypeID() & srcType & 0xf) && preDir != Direction::Down)
         return cells[r-1][c];
-    if(r<row-1 && (cells[r+1][c]->GetCellTypeID() & srcType & 0xf))
+    if(r<row-1 && (cells[r+1][c]->GetCellTypeID() & srcType & 0xf) && preDir != Direction::Up)
         return cells[r+1][c];
-    if(c>0 && (cells[r][c-1]->GetCellTypeID() & srcType & 0xf))
+    if(c>0 && (cells[r][c-1]->GetCellTypeID() & srcType & 0xf) && preDir != Direction::Right)
         return cells[r][c-1];
-    if(c<col-1 && (cells[r][c+1]->GetCellTypeID() & srcType & 0xf))
+    if(c<col-1 && (cells[r][c+1]->GetCellTypeID() & srcType & 0xf) && preDir != Direction::Left)
         return cells[r][c+1];
     return cells[r][c];
 }

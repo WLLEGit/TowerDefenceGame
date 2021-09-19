@@ -16,7 +16,7 @@
 #include<QTimer>
 #include<cmath>
 
-constexpr int CELLWIDTH = 65;   //单元格像素大小
+constexpr int CELLWIDTH = 70;   //单元格像素大小
 constexpr int FPS = 30;         //帧率
 
 enum class Direction{Left, Down, Up, Right, None};

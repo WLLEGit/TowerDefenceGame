@@ -23,7 +23,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
         enemy->enemyName = "pig";
         enemy->maxIndex = 2;
         enemy->curIndex = 0;
-        enemy->dir = gameWindow->FindPath(bornCell->row(), bornCell->col(), bornCell->GetCellTypeID());
+        enemy->dir = gameWindow->FindPath(bornCell->row(), bornCell->col(), bornCell->GetCellTypeID(), Direction::None);
         enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
         enemy->SwithPic();
         enemy->picTimer->start(400);
@@ -37,7 +37,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
         enemy->enemyName = "monster";
         enemy->maxIndex = 2;
         enemy->curIndex = 0;
-        enemy->dir = gameWindow->FindPath(bornCell->row(), bornCell->col(), bornCell->GetCellTypeID());
+        enemy->dir = gameWindow->FindPath(bornCell->row(), bornCell->col(), bornCell->GetCellTypeID(), Direction::None);
         enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
         enemy->SwithPic();
         enemy->picTimer->start(400);
@@ -51,7 +51,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
         enemy->enemyName = "boss";
         enemy->maxIndex = 3;
         enemy->curIndex = 0;
-        enemy->dir = gameWindow->FindPath(bornCell->row(), bornCell->col(), bornCell->GetCellTypeID());
+        enemy->dir = gameWindow->FindPath(bornCell->row(), bornCell->col(), bornCell->GetCellTypeID(), Direction::None);
         enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
         enemy->SwithPic();
         enemy->picTimer->start(400);
@@ -72,10 +72,11 @@ void Enemy::Update(GameWindow *gameWindow)
         this->hide();
         return;
     }
-
+    Direction preDir = dir;
     Cell* posCell = gameWindow->Locate(this);
-    Cell* nextCell = gameWindow->FindNextCell(posCell->row(), posCell->col(), posCell->GetCellTypeID());
-    dir = gameWindow->FindPath(posCell->row(), posCell->col(), posCell->GetCellTypeID());
+    Cell* nextCell = gameWindow->FindNextCell(posCell->row(), posCell->col(), posCell->GetCellTypeID(), preDir);
+    dir = gameWindow->FindPath(posCell->row(), posCell->col(), posCell->GetCellTypeID(), preDir);
+
     //Update Status
     FriendlyUnit* barrierFU = gameWindow->FindPossibleFriendlyUnit(posCell->row(), posCell->col());
     if(barrierFU)
@@ -94,8 +95,8 @@ void Enemy::Update(GameWindow *gameWindow)
 
         //Update position
         double tmp = sqrt((nextCell->x() - this->x())*(nextCell->x() - this->x()) + (nextCell->y() - this->y())*(nextCell->y() - this->y()));
-        int deltaX=int((nextCell->x() - this->x())/ tmp * speed);
-        int deltaY=int((nextCell->y() - this->y()) / tmp * speed);
+        int deltaX=round((nextCell->x() - this->x())/ tmp * speed);
+        int deltaY=round((nextCell->y() - this->y()) / tmp * speed);
         this->setGeometry(this->x()+deltaX, this->y()+deltaY, this->width(), this->height());
     }
 

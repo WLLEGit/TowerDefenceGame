@@ -51,8 +51,8 @@ private:
 public:
     void OnPlacableClicked(int r, int c);
     Cell* Locate(QLabel* src);
-    Direction FindPath(int r, int c, int srcType);
-    Cell* FindNextCell(int r, int c, int srcType);
+    Direction FindPath(int r, int c, int srcType, Direction preDir);
+    Cell* FindNextCell(int r, int c, int srcType, Direction preDir);
     FriendlyUnit* FindPossibleFriendlyUnit(int r, int c);
     friend void Enemy::Update(GameWindow*);
 };
