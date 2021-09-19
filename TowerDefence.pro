@@ -17,20 +17,25 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     enemy.cpp \
-    gamescene.cpp \
+    gamewindow.cpp \
+    header.cpp \
     main.cpp \
     mainwindow.cpp \
+    mylabel.cpp \
     tower.cpp
 
 HEADERS += \
     enemy.h \
-    gamescene.h \
+    gamewindow.h \
     header.h \
     mainwindow.h \
+    mylabel.h \
     tower.h
 
 FORMS += \
-    mainwindow.ui
+    gamewindow.ui \
+    mainwindow.ui \
+    mylabel.ui
 
 TRANSLATIONS += \
     TowerDefence_zh_CN.ts
@@ -39,3 +44,7 @@ TRANSLATIONS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    map.qrc \
+    tower.qrc

@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/">
+        <file>assets/towers/Bullet_Cannon.png</file>
+        <file>assets/towers/Bullet_MG.png</file>
+        <file>assets/towers/Cannon.png</file>
+        <file>assets/towers/Cannon2.png</file>
+        <file>assets/towers/Cannon3.png</file>
+        <file>assets/towers/MG.png</file>
+        <file>assets/towers/MG2.png</file>
+        <file>assets/towers/MG3.png</file>
+        <file>assets/towers/Missile.png</file>
+        <file>assets/towers/Missile_Launcher.png</file>
+        <file>assets/towers/Missile_Launcher2.png</file>
+        <file>assets/towers/Missile_Launcher3.png</file>
+        <file>assets/towers/Tower.png</file>
+    </qresource>
+</RCC>

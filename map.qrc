@@ -1,0 +1,25 @@
+<RCC>
+    <qresource prefix="/">
+        <file>assets/map/0000.png</file>
+        <file>assets/map/0001.png</file>
+        <file>assets/map/0010.png</file>
+        <file>assets/map/0011.png</file>
+        <file>assets/map/0100.png</file>
+        <file>assets/map/0101.png</file>
+        <file>assets/map/0110.png</file>
+        <file>assets/map/1000.png</file>
+        <file>assets/map/1001.png</file>
+        <file>assets/map/1010.png</file>
+        <file>assets/map/1100.png</file>
+        <file>assets/map/block.png</file>
+        <file>assets/map/copper.png</file>
+        <file>assets/map/gold.png</file>
+        <file>assets/map/0111.png</file>
+        <file>assets/map/1011.png</file>
+        <file>assets/map/1101.png</file>
+        <file>assets/map/1110.png</file>
+        <file>assets/map/1111.png</file>
+        <file>assets/map/end.png</file>
+        <file>assets/map/start.png</file>
+    </qresource>
+</RCC>
