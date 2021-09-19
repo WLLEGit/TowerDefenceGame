@@ -10,7 +10,14 @@ GameWindow::GameWindow(QWidget *parent, int mapID) :
     LoadMap(mapID);
     InitMapLabels();
 
+    enemies.push_back(Enemy::GenerateEnemy(1, this, cells[1][11], this, 20));
+
     this->setFixedSize(col * CELLWIDTH, row * CELLWIDTH);
+
+    fpsTimer = new QTimer(this);
+    connect(fpsTimer, &QTimer::timeout, this, &GameWindow::UpdateOneFrame);
+
+    RunMainloop();
 }
 
 GameWindow::~GameWindow()
@@ -33,7 +40,7 @@ void GameWindow::LoadMap(int id)
         for(int j = 0; j < col; ++j)
         {
             in >> type;
-            cells[i][j] = Cell(type);
+            cells[i][j] = new Cell(type, 0, this, i, j);
         }
     }
 }
@@ -42,12 +49,12 @@ void GameWindow::SetCellRsrcImg(int r, int c)
 {
     assert(0 <= r && r <= row && 0 <= c && c <= col);
 
-    Cell& cell = cells[r][c];
-    Cell::CellType cellType = cell.GetCellType();
+    Cell* cell = cells[r][c];
+    Cell::CellType cellType = cell->GetCellType();
     QString path;
     if(cellType == Cell::Path)
     {
-        if(cell.GetCellTypeID() == Cell::Start)
+        if(cell->GetCellTypeID() == Cell::Start)
             path = ":/assets/map/start.png";
         else
         {
@@ -62,41 +69,94 @@ void GameWindow::SetCellRsrcImg(int r, int c)
     {
         path = ":/assets/map/block.png";
     }
-    map[r][c]->setPixmap(QPixmap(path));
+    cells[r][c]->setPixmap(QPixmap(path));
 
     if(cellType == Cell::Placable)
     {
         path = ":/assets/map/block.png";
-        map[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/towers/Tower.png"))));
+        cells[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/towers/Tower.png"))));
 
     }
 
-    if(cell.GetResourceType())
+    if(cell->GetResourceType())
     {
-        if(cell.GetResourceType() == 1)
-            map[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/map/gold.png"))));
-        else if(cell.GetResourceType() == 2)
-            map[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/map/coppers.png"))));
+        if(cell->GetResourceType() == 1)
+            cells[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/map/gold.png"))));
+        else if(cell->GetResourceType() == 2)
+            cells[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/map/coppers.png"))));
     }
 
-    if(cell.GetCellTypeID() == Cell::End)
-        map[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/map/end.png"))));
+    if(cell->GetCellTypeID() == Cell::End)
+        cells[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/map/end.png"))));
 }
 
 void GameWindow::InitMapLabels()
 {
-    map.resize(row);
     for(int i = 0; i < row; ++i)
     {
-        map[i].resize(col);
         for(int j = 0; j < col; ++j)
         {
-            map[i][j] = new QLabel(this);
-            map[i][j]->setGeometry(CELLWIDTH * j, CELLWIDTH*i, CELLWIDTH, CELLWIDTH);
-            map[i][j]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-            map[i][j]->setScaledContents(true);
+            cells[i][j]->setGeometry(CELLWIDTH * j, CELLWIDTH*i, CELLWIDTH, CELLWIDTH);
+            cells[i][j]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+            cells[i][j]->setScaledContents(true);
             SetCellRsrcImg(i, j);
         }
     }
+}
+
+Cell *GameWindow::Locate(QLabel *src)
+{
+    //src 与 Cell 需要在同一个父控件中
+    int r = src->y() / CELLWIDTH;
+    int c = src->x() / CELLWIDTH;
+    return cells[r][c];
+}
+
+Direction GameWindow::FindPath(int r, int c, int srcType)
+{
+    if(r>0 && (cells[r-1][c]->GetCellTypeID() & srcType * 0xf))
+        return Direction::Up;
+    if(r<row-1 && (cells[r+1][c]->GetCellTypeID() & srcType & 0xf))
+        return Direction::Down;
+    if(c>0 && (cells[r][c-1]->GetCellTypeID() & srcType & 0xf))
+        return Direction::Left;
+    if(c<col-1 && (cells[r][c+1]->GetCellTypeID() & srcType & 0xf))
+        return Direction::Right;
+    return Direction::None;
+}
+
+Cell *GameWindow::FindNextCell(int r, int c, int srcType)
+{
+    if(r>0 && (cells[r-1][c]->GetCellTypeID() & srcType & 0xf))
+        return cells[r-1][c];
+    if(r<row-1 && (cells[r+1][c]->GetCellTypeID() & srcType & 0xf))
+        return cells[r+1][c];
+    if(c>0 && (cells[r][c-1]->GetCellTypeID() & srcType & 0xf))
+        return cells[r][c-1];
+    if(c<col-1 && (cells[r][c+1]->GetCellTypeID() & srcType & 0xf))
+        return cells[r][c+1];
+    return cells[r][c];
+}
+
+FriendlyUnit *GameWindow::FindPossibleFriendlyUnit(int r, int c)
+{
+    for(auto& fu : friendUnits)
+        if(fu->GetPositionCell() == cells[r][c] && fu->CanHoldEnemy())
+            return fu;
+    return nullptr;
+}
+
+void GameWindow::RunMainloop()
+{
+    fpsTimer->start(1000/FPS);
+}
+
+void GameWindow::UpdateOneFrame()
+{
+    if(gameStatus != Running)
+        return;
+
+    for(auto& enemy : enemies)
+        enemy->Update(this);
 }
 

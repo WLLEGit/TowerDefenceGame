@@ -21,7 +21,5 @@ private:
     Ui::MainWindow *ui;
     GameWindow* gameWindow;
 
-public:
-    void OnCellChanged();
 };
 #endif // MAINWINDOW_H

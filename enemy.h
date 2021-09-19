@@ -2,8 +2,12 @@
 #define ENEMY_H
 
 #include "header.h"
+#include "cell.h"
 
-class Enemy
+class GameWindow;
+class FriendlyUnit;
+
+class Enemy : public QLabel
 {
 private:
     double maxHealth;  //生命力
@@ -13,17 +17,35 @@ private:
     double rangedDamageRate;  //受远程伤害加成比例
     double closeDamageRate;  //受近程伤害加成比例
     double attackInterval;   //攻击间隔
-    QPropertyAnimation* attackAnimation;    //攻击动作
-    QPropertyAnimation* moveAnimation;    //移动动作
+    int attackRange;
+
+    QTimer* picTimer;
+    int curIndex;
+    int maxIndex;
+    QString enemyName;
+
+    QTimer* attackTimer;
+
+    Direction dir;
+    double speed;
+    int pathType;
+
+    enum EnemyStatus {Moving, Fighting, Dead};
+    EnemyStatus status=Moving;
+
+    FriendlyUnit* target=nullptr;
+
 
 public:
-    double posX, posY;
+    Enemy(QWidget* parent=nullptr, double health=0, double attack=0, int dealHealthDamage=0, double rangedDamageRate=0, \
+          double closeDamageRate=0, double attackInterval=0, double speed=0, int attackRange=0);
 
+    static Enemy* GenerateEnemy(int type, QWidget* parent, Cell* bornCell, GameWindow* gameWindow, int pathType);
+    void Update(GameWindow* gameWindow);  //每帧调用
 
-public:
-    Enemy(double health=0, double attack=0, int dealHealthDamage=0, double rangedDamageRate=0, \
-            double closeDamageRate=0, double attackInterval=0, QPropertyAnimation* attackAnimation=nullptr\
-            , QPropertyAnimation* moveAnimation=nullptr);
+private:
+    void SwithPic();
+    void Attack();
 };
 
 #endif // ENEMY_H

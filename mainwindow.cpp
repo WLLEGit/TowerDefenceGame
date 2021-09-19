@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     QPushButton* btn = new QPushButton("start", this);
     gameWindow = new GameWindow(this);
 
-    connect(btn, &QPushButton::clicked, this, [=](){this->hide();gameWindow->show();});
+    connect(btn, &QPushButton::clicked, this, [=](){this->hide();gameWindow->show(); gameWindow->gameStatus=GameWindow::Running;});
 }
 
 MainWindow::~MainWindow()
