@@ -1,6 +1,8 @@
 #include "gamewindow.h"
 #include "ui_gamewindow.h"
 
+#include<iostream>
+
 GameWindow::GameWindow(QWidget *parent, int mapID) :
     QMainWindow(parent),
     ui(new Ui::GameWindow)
@@ -26,7 +28,6 @@ GameWindow::~GameWindow()
 }
 void GameWindow::LoadMap(int id)
 {
-    int type;
     QString path = QString("D:\\HomeWork\\GaoCheng\\Project\\Code\\TowerDefence\\assets\\MapConfig\\GameMap%1").arg(id);
     QFile fin(path);
     fin.open(QIODevice::ReadOnly);
@@ -38,11 +39,54 @@ void GameWindow::LoadMap(int id)
     {
         cells[i].resize(col);
         for(int j = 0; j < col; ++j)
-        {
-            in >> type;
-            cells[i][j] = new Cell(type, 0, this, i, j);
-        }
+            cells[i][j] = new Cell(0, 0, this, i, j);
     }
+
+    LoadMapHelper(in, "Red", Cell::Red);
+    LoadMapHelper(in, "Green", Cell::Green);
+    LoadMapHelper(in, "Blue", Cell::Blue);
+    LoadMapHelper(in, "White", Cell::White);
+    LoadMapHelper(in, "Placable", Cell::Placable);
+
+    for(int i = 0; i < row; ++i)
+        for(int j = 0; j < col; ++j)
+            if(cells[i][j]->GetCellTypeID()==0)
+                cells[i][j]->AddType(Cell::Blocked);
+}
+
+void GameWindow::LoadMapHelper(QTextStream &in, QString newPathType, Cell::CellType cellType)
+{
+    QString pathType;
+    Cell* start;
+    QList<Cell*>* path;
+    int n, r, c;
+    in >> pathType >> n;
+    assert(pathType == newPathType);
+    for(int i = 0; i < n; ++i)
+    {
+        in >> r >> c;
+        if(cellType == Cell::Placable)
+        {
+            cells[r][c]->AddType(cellType);
+        }
+        else
+        {
+            if(i == 0)
+            {
+                cells[r][c]->AddType(Cell::Start);
+                start = cells[r][c];
+                path = new QList<Cell*>();
+                pathMap[start] = path;
+            }
+            else if(i == n-1)
+                cells[r][c]->AddType(Cell::End);
+            else
+                cells[r][c]->AddType(cellType);
+            path->push_back(cells[r][c]);
+        }
+
+    }
+    path->push_back(path->last());
 }
 
 void GameWindow::SetCellRsrcImg(int r, int c)
@@ -112,10 +156,6 @@ Cell *GameWindow::Locate(QLabel *src)
     return cells[r][c];
 }
 
-void GameWindow::InitPaths()
-{
-}
-
 
 FriendlyUnit *GameWindow::FindPossibleFriendlyUnit(int r, int c)
 {
@@ -123,6 +163,11 @@ FriendlyUnit *GameWindow::FindPossibleFriendlyUnit(int r, int c)
         if(fu->GetPositionCell() == cells[r][c] && fu->CanHoldEnemy())
             return fu;
     return nullptr;
+}
+
+void GameWindow::EnemyHit(int damage)
+{
+    health -= damage;
 }
 
 void GameWindow::RunMainloop()

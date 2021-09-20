@@ -18,30 +18,26 @@ MainWindow::MainWindow(QWidget *parent)
         fout.open(QIODevice::WriteOnly);
         QTextStream out(&fout);
         out << r << " " << c << endl;
-        if(paths[Red].length())
-        {
-            out << "Red " << paths[Red].length() << endl;
-            for(auto& xy : paths[Red])
-                out << xy.first << " " << xy.second << endl;
-        }
-        if(paths[Green].length())
-        {
-            out << "Green " << paths[Green].length() << endl;
-            for(auto& xy : paths[Red])
-                out << xy.first << " " << xy.second << endl;
-        }
-        if(paths[Blue].length())
-        {
-            out << "Blue " << paths[Blue].length() << endl;
-            for(auto& xy : paths[Red])
-                out << xy.first << " " << xy.second << endl;
-        }
-        if(paths[White].length())
-        {
-            out << "White " << paths[White].length() << endl;
-            for(auto& xy : paths[Red])
-                out << xy.first << " " << xy.second << endl;
-        }
+
+        out << "Red " << paths[Red].length() << endl;
+        for(auto& xy : paths[Red])
+            out << xy.first << " " << xy.second << endl;
+
+        out << "Green " << paths[Green].length() << endl;
+        for(auto& xy : paths[Green])
+            out << xy.first << " " << xy.second << endl;
+
+        out << "Blue " << paths[Blue].length() << endl;
+        for(auto& xy : paths[Blue])
+            out << xy.first << " " << xy.second << endl;
+
+        out << "White " << paths[White].length() << endl;
+        for(auto& xy : paths[White])
+            out << xy.first << " " << xy.second << endl;
+
+        out << "Placable " << paths[Tower].length() << endl;
+        for(auto& xy : paths[Tower])
+            out << xy.first << " " << xy.second << endl;
     });
 }
 

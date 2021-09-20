@@ -23,7 +23,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
         enemy->enemyName = "pig";
         enemy->maxIndex = 2;
         enemy->curIndex = 0;
-        enemy->dir = gameWindow->FindPath(bornCell->row(), bornCell->col(), bornCell->GetCellTypeID(), Direction::None);
+        enemy->path = gameWindow->FindPath(bornCell);
         enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
         enemy->SwithPic();
         enemy->picTimer->start(400);
@@ -37,7 +37,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
         enemy->enemyName = "monster";
         enemy->maxIndex = 2;
         enemy->curIndex = 0;
-        enemy->dir = gameWindow->FindPath(bornCell->row(), bornCell->col(), bornCell->GetCellTypeID(), Direction::None);
+        enemy->path = gameWindow->FindPath(bornCell);
         enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
         enemy->SwithPic();
         enemy->picTimer->start(400);
@@ -51,7 +51,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
         enemy->enemyName = "boss";
         enemy->maxIndex = 3;
         enemy->curIndex = 0;
-        enemy->dir = gameWindow->FindPath(bornCell->row(), bornCell->col(), bornCell->GetCellTypeID(), Direction::None);
+        enemy->path = gameWindow->FindPath(bornCell);
         enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
         enemy->SwithPic();
         enemy->picTimer->start(400);
@@ -72,10 +72,22 @@ void Enemy::Update(GameWindow *gameWindow)
         this->hide();
         return;
     }
-    Direction preDir = dir;
+
     Cell* posCell = gameWindow->Locate(this);
-    Cell* nextCell = gameWindow->FindNextCell(posCell->row(), posCell->col(), posCell->GetCellTypeID(), preDir);
-    dir = gameWindow->FindPath(posCell->row(), posCell->col(), posCell->GetCellTypeID(), preDir);
+    if(posCell->GetCellTypeID() == Cell::End)   //检查是否到达终点
+    {
+        gameWindow->EnemyHit(dealHealthDamage);
+        curHealth = 0;
+        status = Dead;
+        this->hide();
+        return;
+    }
+    if(posCell != (*path)[posIndex])
+    {
+        posCell = (*path)[posIndex + 1];
+        ++posIndex;
+    }
+    Cell* nextCell = (*path)[posIndex + 1];
 
     //Update Status
     FriendlyUnit* barrierFU = gameWindow->FindPossibleFriendlyUnit(posCell->row(), posCell->col());
@@ -105,7 +117,7 @@ void Enemy::Update(GameWindow *gameWindow)
 void Enemy::SwithPic()
 {
     curIndex = (curIndex + 1) % (maxIndex);
-    QPixmap pix(QString(":/assets/monsters/%1%2.png").arg(enemyName).arg(curIndex + (dir == Direction::Right ? maxIndex : 0)));
+    QPixmap pix(QString(":/assets/monsters/%1%2.png").arg(enemyName).arg(curIndex + ((*path)[posIndex+1]->col()-(*path)[posIndex]->col() ? maxIndex : 0)));
     pix = pix.scaledToHeight(CELLWIDTH*0.8);
     this->resize(pix.width(), pix.height());
     this->setPixmap(pix);

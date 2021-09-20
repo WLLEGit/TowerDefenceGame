@@ -32,7 +32,7 @@ public:
     inline CellType GetCellType() const {return cellType;}
     inline int GetCellTypeID()const {return type;}
     inline int GetResourceType() const {return resourceType;}
-    inline void SetResourceType(int type) {resourceType = type;}
+    inline void AddType(int type){SetType(this->type | type);}
     inline int row(){return r;}
     inline int col(){return c;}
 

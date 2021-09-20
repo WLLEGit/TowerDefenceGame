@@ -26,7 +26,8 @@ private:
 
     QTimer* attackTimer;
 
-    QList<Cell*> path;
+    QList<Cell*>* path;
+    int posIndex=0;
     double speed;
     int pathType;
 
