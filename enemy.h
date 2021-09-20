@@ -37,6 +37,9 @@ private:
 
     Hero* target=nullptr;
 
+    QProgressBar* healthBar;
+    void DrawHealthLine();
+
 
 public:
     Enemy(QWidget* parent=nullptr, double health=0, double attack=0, int dealHealthDamage=0, double rangedDamageRate=0, \
@@ -46,8 +49,8 @@ public:
     void Update(GameWindow* gameWindow);  //每帧调用
     inline bool IsAlive(){return status != Dead;}
     void BeAttacked(int damage){curHealth -= damage;}
+    inline float GetHealthRate(){return (float)curHealth / maxHealth;}
 
-    friend class Hero;
 
 private:
     void SwithPic();

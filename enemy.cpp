@@ -9,6 +9,19 @@ Enemy::Enemy(QWidget* parent, double health, double attack, int dealHealthDamage
 {
     picTimer = new QTimer;
     attackTimer = new QTimer();
+
+    healthBar = new QProgressBar(parent);
+    healthBar->setMinimum(0);
+    healthBar->setMaximum(100);
+    healthBar->setStyleSheet("QProgressBar{background:rgba(255,255,255,0);} QProgressBar::chunk{border-radius:5px;background:red}");
+    healthBar->setTextVisible(false);
+    DrawHealthLine();
+}
+
+void Enemy::DrawHealthLine()
+{
+    healthBar->setGeometry(x(), y()-CELLWIDTH/10, CELLWIDTH*0.8, CELLWIDTH/10);
+    healthBar->setValue((float)curHealth/maxHealth * 100);
 }
 
 Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindow* gameWindow, int pathType)
@@ -16,7 +29,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
     Enemy* enemy;
     if(type == 0)   //pig
     {
-        enemy = new Enemy(parent, 10, 5, 1, 0.8, 1.1, 1, CELLWIDTH/FPS, 1);
+        enemy = new Enemy(parent, 15, 7, 1, 0.8, 1.1, 1, CELLWIDTH/FPS, 1);
         connect(enemy->picTimer, &QTimer::timeout, enemy, &Enemy::SwithPic);
         connect(enemy->attackTimer, &QTimer::timeout, enemy, &Enemy::Attack);
         enemy->pathType = pathType;
@@ -30,7 +43,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
     }
     else if(type == 1)  //Monster
     {
-        enemy = new Enemy(parent, 20, 3, 2, 1.2, 0.8, 1, CELLWIDTH/2/FPS, 2);
+        enemy = new Enemy(parent, 25, 5, 2, 1.2, 0.8, 1, CELLWIDTH/2/FPS, 2);
         connect(enemy->picTimer, &QTimer::timeout, enemy, &Enemy::SwithPic);
         connect(enemy->attackTimer, &QTimer::timeout, enemy, &Enemy::Attack);
         enemy->pathType = pathType;
@@ -44,7 +57,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
     }
     else if(type == 2)  //Boss
     {
-        enemy = new Enemy(parent, 50, 20, 5, 1, 1, 1.8, CELLWIDTH/2/FPS, 1);
+        enemy = new Enemy(parent, 100, 20, 5, 1, 1, 1.8, (float)CELLWIDTH/3/FPS, 1);
         connect(enemy->picTimer, &QTimer::timeout, enemy, &Enemy::SwithPic);
         connect(enemy->attackTimer, &QTimer::timeout, enemy, &Enemy::Attack);
         enemy->pathType = pathType;
@@ -70,6 +83,7 @@ void Enemy::Update(GameWindow *gameWindow)
     {
         status = Dead;
         this->hide();
+        healthBar->hide();
         return;
     }
 
@@ -80,6 +94,7 @@ void Enemy::Update(GameWindow *gameWindow)
         curHealth = 0;
         status = Dead;
         this->hide();
+        healthBar->hide();
         return;
     }
     if(posCell != (*path)[posIndex])    //检查是否到达下一格
@@ -115,6 +130,7 @@ void Enemy::Update(GameWindow *gameWindow)
         this->setGeometry(this->x()+deltaX, this->y()+deltaY, this->width(), this->height());
     }
 
+    DrawHealthLine();
 }
 
 void Enemy::SwithPic()
@@ -130,9 +146,7 @@ void Enemy::Attack()
 {
     if(target && target->IsAlive())
     {
-        qDebug() << "Attack: " << target << "CurHealth: " << target->curHealth;
         target->BeAttacked(attack);
-        qDebug() << "curHealth: " << target->curHealth;
     }
     else
     {

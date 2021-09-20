@@ -17,6 +17,10 @@
 #include<QList>
 #include<QObject>
 #include<QMap>
+#include<QBrush>
+#include<QPainter>
+#include<QPaintEvent>
+#include<QProgressBar>
 
 #define DISTANCE(x,y) (sqrt((x)*(x)+(y)*(y)))
 

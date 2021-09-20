@@ -32,6 +32,7 @@ GameWindow::~GameWindow()
 {
     delete ui;
 }
+
 void GameWindow::LoadMap(int id)
 {
     QString path = QString("D:\\HomeWork\\GaoCheng\\Project\\Code\\TowerDefence\\assets\\MapConfig\\GameMap%1").arg(id);
@@ -199,13 +200,16 @@ void GameWindow::UpdateOneFrame()
 
     for(auto& hero : heros)
         hero->Update(this);
+
 }
 
 void GameWindow::OnHeroDead(Hero *hero)
 {
+    delete hero->healthBar;
     delete hero;
     heros.removeOne(hero);
 }
+
 
 Cell *GameWindow::GetAt(int r, int c)
 {

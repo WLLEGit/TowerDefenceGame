@@ -31,6 +31,7 @@ public:
     Tower(QWidget* parent=nullptr, int cost=0, int level=0, int range=0, double attack=0, double attackInterval=0, Cell* locationCell=nullptr);
     void Update(GameWindow* gameWindow);
     void Upgrade(); //升级
+
 };
 
 class ArrowTower : public Tower     //箭塔
@@ -53,20 +54,22 @@ class Hero : public QLabel  //友方单位
     Q_OBJECT
 
 public:
-    Hero(QWidget* parent, Cell* posCell, int capacity, int maxCapacity, int curHealth, \
+    Hero(QWidget* parent, Cell* posCell, int maxCapacity,  \
          int maxHealth, int attack, double attackInterval, QString name, int range, int cost);
-    bool CanHoldEnemy(){return curHealth > 0 && capacity > 0;}
     Cell* GetPositionCell(){return posCell;}
+
+    bool CanHoldEnemy(){return curHealth > 0 && capacity > 0;}
     void AddEnemy(Enemy* enemy);
     void RemoveEnemy(Enemy* enemy);
+
     void BeAttacked(int damage){curHealth -= damage;}
     bool IsAlive(){return curHealth > 0;}
+    inline float GetHealthRate(){return (float)curHealth / maxHealth;}
 
     void Update(GameWindow* gameWindow);
 
     static Hero* GenerateHero(QWidget* parent, Cell* posCell, int type);
 
-    friend class Enemy;
 
 protected:
     Cell* posCell;
@@ -88,6 +91,10 @@ protected:
     Enemy* target;
     void Attack();
     bool InRange(int x, int y);
+
+public:
+    QProgressBar* healthBar;
+    void DrawHealthLine();
 
 signals:
     void HeroDead(Hero*);

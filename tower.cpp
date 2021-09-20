@@ -86,13 +86,15 @@ MissleTower::MissleTower(QWidget *parent, Cell* locationCell)   //dps=6
     show();
 }
 
-Hero::Hero(QWidget *parent, Cell* posCell, int capacity, int maxCapacity, int attack, \
-           int curHealth, int maxHealth, double attackInterval, QString name, int range, int cost)
-    :QLabel(parent), posCell(posCell), capacity(capacity), maxCapacity(maxCapacity), curHealth(curHealth),\
+Hero::Hero(QWidget *parent, Cell* posCell, int maxCapacity, int attack, \
+           int maxHealth, double attackInterval, QString name, int range, int cost)
+    :QLabel(parent), posCell(posCell), capacity(maxCapacity), maxCapacity(maxCapacity), curHealth(maxHealth),\
       maxHealth(maxHealth), attack(attack), attackInterval(attackInterval), name(name), range(range), cost(cost)
 {
     setGeometry(posCell->x(), posCell->y(), CELLWIDTH, CELLWIDTH);
+
     target = nullptr;
+
     curIndex = 0;
     maxIndex = 4;
     picTimer = new QTimer(this);
@@ -104,8 +106,16 @@ Hero::Hero(QWidget *parent, Cell* posCell, int capacity, int maxCapacity, int at
         this->resize(pix.width(), pix.height());
         this->setPixmap(pix);
     });
+
     attackTimer = new QTimer(this);
     connect(attackTimer, &QTimer::timeout, this, &Hero::Attack);
+
+    healthBar = new QProgressBar(parent);
+    healthBar->setMinimum(0);
+    healthBar->setMaximum(100);
+    healthBar->setStyleSheet("QProgressBar{background:rgba(255,255,255,0);} QProgressBar::chunk{border-radius:5px;background:red}");
+    healthBar->setTextVisible(false);
+    DrawHealthLine();
 }
 
 void Hero::AddEnemy(Enemy *enemy)
@@ -126,9 +136,7 @@ void Hero::Attack()
 {
     if(target && target->IsAlive())
     {
-        qDebug() << "Attack: " << target << "CurHealth: " << target->curHealth;
         target->BeAttacked(attack);
-        qDebug() << "curHealth: " << target->curHealth;
     }
     else
     {
@@ -142,11 +150,16 @@ bool Hero::InRange(int x, int y)
     return DISTANCE(x-this->x(), y-this->y()) <= CELLWIDTH * (double)(range - 0.5);
 }
 
+void Hero::DrawHealthLine()
+{
+    healthBar->setGeometry(x(), y()-CELLWIDTH/10, CELLWIDTH*0.8, CELLWIDTH/10);
+    healthBar->setValue((float)curHealth/maxHealth * 100);
+}
+
 void Hero::Update(GameWindow* gameWindow)
 {
     if(curHealth <= 0)
         emit HeroDead(nullptr);
-
     if(!target || !target->IsAlive() || !InRange(target->x(), target->y()))
     {
         target = nullptr;
@@ -162,6 +175,7 @@ void Hero::Update(GameWindow* gameWindow)
         if(!attackTimer->isActive())
             attackTimer->start(attackInterval * 1000);
     }
+    DrawHealthLine();
 }
 
 Hero *Hero::GenerateHero(QWidget *parent, Cell *posCell, int type)
@@ -178,11 +192,11 @@ Hero *Hero::GenerateHero(QWidget *parent, Cell *posCell, int type)
 }
 
 Hero1::Hero1(QWidget *parent, Cell *posCell)
-    :Hero(parent, posCell, 3, 3, 50, 50, 10, 0.8, "one", 2, 200)
+    :Hero(parent, posCell, 3, 10, 50, 0.8, "one", 2, 200)
 {
 }
 
 Hero2::Hero2(QWidget *parent, Cell *posCell)
-    :Hero(parent, posCell, 2, 2, 20, 20, 25, 0.8, "two", 1, 200)
+    :Hero(parent, posCell, 2, 20, 25, 0.8, "two", 1, 200)
 {
 }
