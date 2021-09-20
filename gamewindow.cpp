@@ -12,7 +12,11 @@ GameWindow::GameWindow(QWidget *parent, int mapID) :
     LoadMap(mapID);
     InitMapLabels();
 
+    //-------------------Test Units--------------
     enemies.push_back(Enemy::GenerateEnemy(1, this, cells[1][11], this, 20));
+    towers.push_back(new MissleTower(this, cells[3][10]));
+    heros.push_back(FriendlyUnit::GenerateHero(this, cells[1][2], 1));
+    //------------------------------------------
 
     this->setFixedSize(col * CELLWIDTH, row * CELLWIDTH);
 
@@ -164,7 +168,7 @@ Cell *GameWindow::Locate(QLabel *src)
 
 FriendlyUnit *GameWindow::FindPossibleFriendlyUnit(int r, int c)
 {
-    for(auto& fu : friendUnits)
+    for(auto& fu : heros)
         if(fu->GetPositionCell() == cells[r][c] && fu->CanHoldEnemy())
             return fu;
     return nullptr;
@@ -187,6 +191,9 @@ void GameWindow::UpdateOneFrame()
 
     for(auto& enemy : enemies)
         enemy->Update(this);
+
+    for(auto& tower : towers)
+        tower->Update(this);
 }
 
 Cell *GameWindow::GetAt(int r, int c)

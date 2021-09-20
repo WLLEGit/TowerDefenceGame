@@ -50,8 +50,8 @@ public:
 class FriendlyUnit : public QLabel  //友方单位
 {
 public:
-    enum Type{Guard, Miner};
-    FriendlyUnit(QWidget* parent=nullptr);
+    FriendlyUnit(QWidget* parent, Cell* posCell, int capacity, int maxCapacity, int curHealth, \
+                 int maxHealth, int attack, double attackInterval, QString name, int range, int cost);
     bool CanHoldEnemy(){return capacity != 0;}
     Cell* GetPositionCell(){return posCell;}
     void AddEnemy(Enemy* enemy);
@@ -60,15 +60,37 @@ public:
 
     void Update();
 
-private:
+    static FriendlyUnit* GenerateHero(QWidget* parent, Cell* posCell, int type);
+
+protected:
     Cell* posCell;
     int capacity;
     int maxCapacity;
     int curHealth;
     int maxHealth;
-
-
+    int attack;
+    double attackInterval;
+    QString name;
+    int range;
+    int cost;
+    QTimer* picTimer;
+    int curIndex;
+    int maxIndex;
 };
+
+class Hero1 : public FriendlyUnit
+{
+public:
+    Hero1(QWidget* parent, Cell* posCell);
+};
+
+class Hero2 : public FriendlyUnit
+{
+public:
+    Hero2(QWidget* parent, Cell* posCell);
+};
+
+
 
 class Bullet : public QLabel        //子弹，异步发射
 {

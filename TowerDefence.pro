@@ -47,5 +47,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     enemies.qrc \
+    heros.qrc \
     map.qrc \
     tower.qrc

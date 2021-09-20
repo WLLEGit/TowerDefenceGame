@@ -31,7 +31,7 @@ private:
     QVector<QVector<Cell*>> cells;
     QVector<Enemy*> enemies;
     QVector<Tower*> towers;
-    QVector<FriendlyUnit*> friendUnits;
+    QVector<FriendlyUnit*> heros;
 
     int round;
     int health;

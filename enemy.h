@@ -10,7 +10,7 @@ class FriendlyUnit;
 class Enemy : public QLabel
 {
 private:
-    double maxHealth;  //生命力
+    double maxHealth;  //生命
     double curHealth;
     double attack;  //攻击力
     int dealHealthDamage;   //到达终点造成的伤害
