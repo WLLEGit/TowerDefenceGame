@@ -7,6 +7,7 @@
 
 class Tower : public QLabel     //塔
 {
+    Q_OBJECT
 protected:
     int cost;
     int level;
@@ -47,20 +48,25 @@ public:
 
 
 
-class FriendlyUnit : public QLabel  //友方单位
+class Hero : public QLabel  //友方单位
 {
+    Q_OBJECT
+
 public:
-    FriendlyUnit(QWidget* parent, Cell* posCell, int capacity, int maxCapacity, int curHealth, \
-                 int maxHealth, int attack, double attackInterval, QString name, int range, int cost);
-    bool CanHoldEnemy(){return capacity != 0;}
+    Hero(QWidget* parent, Cell* posCell, int capacity, int maxCapacity, int curHealth, \
+         int maxHealth, int attack, double attackInterval, QString name, int range, int cost);
+    bool CanHoldEnemy(){return curHealth > 0 && capacity > 0;}
     Cell* GetPositionCell(){return posCell;}
     void AddEnemy(Enemy* enemy);
     void RemoveEnemy(Enemy* enemy);
     void BeAttacked(int damage){curHealth -= damage;}
+    bool IsAlive(){return curHealth > 0;}
 
-    void Update();
+    void Update(GameWindow* gameWindow);
 
-    static FriendlyUnit* GenerateHero(QWidget* parent, Cell* posCell, int type);
+    static Hero* GenerateHero(QWidget* parent, Cell* posCell, int type);
+
+    friend class Enemy;
 
 protected:
     Cell* posCell;
@@ -76,15 +82,24 @@ protected:
     QTimer* picTimer;
     int curIndex;
     int maxIndex;
+    QList<Enemy*> targets;
+    QTimer* attackTimer;
+
+    Enemy* target;
+    void Attack();
+    bool InRange(int x, int y);
+
+signals:
+    void HeroDead(Hero*);
 };
 
-class Hero1 : public FriendlyUnit
+class Hero1 : public Hero
 {
 public:
     Hero1(QWidget* parent, Cell* posCell);
 };
 
-class Hero2 : public FriendlyUnit
+class Hero2 : public Hero
 {
 public:
     Hero2(QWidget* parent, Cell* posCell);
@@ -94,6 +109,7 @@ public:
 
 class Bullet : public QLabel        //子弹，异步发射
 {
+    Q_OBJECT
 private:
     double speed;
     Tower* sender;

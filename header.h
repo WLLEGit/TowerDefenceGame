@@ -12,10 +12,10 @@
 #include<QPicture>
 #include<QPushButton>
 #include<QPropertyAnimation>
-#include<QMetaObject>
 #include<QTimer>
 #include<cmath>
 #include<QList>
+#include<QObject>
 #include<QMap>
 
 #define DISTANCE(x,y) (sqrt((x)*(x)+(y)*(y)))

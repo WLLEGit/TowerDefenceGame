@@ -82,7 +82,7 @@ void Enemy::Update(GameWindow *gameWindow)
         this->hide();
         return;
     }
-    if(posCell != (*path)[posIndex])
+    if(posCell != (*path)[posIndex])    //检查是否到达下一格
     {
         posCell = (*path)[posIndex + 1];
         ++posIndex;
@@ -90,14 +90,17 @@ void Enemy::Update(GameWindow *gameWindow)
     Cell* nextCell = (*path)[posIndex + 1];
 
     //Update Status
-    FriendlyUnit* barrierFU = gameWindow->FindPossibleFriendlyUnit(posCell->row(), posCell->col());
+    Hero* barrierFU = gameWindow->FindPossibleFriendlyUnit(posCell->row(), posCell->col());
     if(barrierFU)
     {
-        status = Fighting;
-        barrierFU->AddEnemy(this);
-        target = barrierFU;
-        if(!attackTimer->isActive())
-            attackTimer->start(attackInterval * 1000);
+        if(target != barrierFU)
+        {
+            status = Fighting;
+            barrierFU->AddEnemy(this);
+            target = barrierFU;
+            if(!attackTimer->isActive())
+                attackTimer->start(attackInterval * 1000);
+        }
     }
     else
     {
@@ -117,7 +120,7 @@ void Enemy::Update(GameWindow *gameWindow)
 void Enemy::SwithPic()
 {
     curIndex = (curIndex + 1) % (maxIndex);
-    QPixmap pix(QString(":/assets/monsters/%1%2.png").arg(enemyName).arg(curIndex + ((*path)[posIndex+1]->col()-(*path)[posIndex]->col() ? maxIndex : 0)));
+    QPixmap pix(QString(":/assets/monsters/%1%2.png").arg(enemyName).arg(curIndex + ((*path)[posIndex+1]->col()-(*path)[posIndex]->col() > 0 ? maxIndex : 0)));
     pix = pix.scaledToHeight(CELLWIDTH*0.8);
     this->resize(pix.width(), pix.height());
     this->setPixmap(pix);
@@ -125,6 +128,15 @@ void Enemy::SwithPic()
 
 void Enemy::Attack()
 {
-    assert(target != nullptr);
-    target->BeAttacked(attack);
+    if(target && target->IsAlive())
+    {
+        qDebug() << "Attack: " << target << "CurHealth: " << target->curHealth;
+        target->BeAttacked(attack);
+        qDebug() << "curHealth: " << target->curHealth;
+    }
+    else
+    {
+        target = nullptr;
+        attackTimer->stop();
+    }
 }

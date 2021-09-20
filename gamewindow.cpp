@@ -15,7 +15,9 @@ GameWindow::GameWindow(QWidget *parent, int mapID) :
     //-------------------Test Units--------------
     enemies.push_back(Enemy::GenerateEnemy(1, this, cells[1][11], this, 20));
     towers.push_back(new MissleTower(this, cells[3][10]));
-    heros.push_back(FriendlyUnit::GenerateHero(this, cells[1][2], 1));
+    auto hero = Hero::GenerateHero(this, cells[6][10], 1);
+    heros.push_back(hero);
+    connect(hero, &Hero::HeroDead, this, &GameWindow::OnHeroDead);
     //------------------------------------------
 
     this->setFixedSize(col * CELLWIDTH, row * CELLWIDTH);
@@ -166,7 +168,7 @@ Cell *GameWindow::Locate(QLabel *src)
 }
 
 
-FriendlyUnit *GameWindow::FindPossibleFriendlyUnit(int r, int c)
+Hero *GameWindow::FindPossibleFriendlyUnit(int r, int c)
 {
     for(auto& fu : heros)
         if(fu->GetPositionCell() == cells[r][c] && fu->CanHoldEnemy())
@@ -194,6 +196,15 @@ void GameWindow::UpdateOneFrame()
 
     for(auto& tower : towers)
         tower->Update(this);
+
+    for(auto& hero : heros)
+        hero->Update(this);
+}
+
+void GameWindow::OnHeroDead(Hero *hero)
+{
+    delete hero;
+    heros.removeOne(hero);
 }
 
 Cell *GameWindow::GetAt(int r, int c)

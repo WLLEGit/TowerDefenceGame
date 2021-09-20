@@ -5,10 +5,11 @@
 #include "cell.h"
 
 class GameWindow;
-class FriendlyUnit;
+class Hero;
 
 class Enemy : public QLabel
 {
+    Q_OBJECT
 private:
     double maxHealth;  //生命
     double curHealth;
@@ -34,7 +35,7 @@ private:
     enum EnemyStatus {Moving, Fighting, Dead};
     EnemyStatus status=Moving;
 
-    FriendlyUnit* target=nullptr;
+    Hero* target=nullptr;
 
 
 public:
@@ -44,6 +45,9 @@ public:
     static Enemy* GenerateEnemy(int type, QWidget* parent, Cell* bornCell, GameWindow* gameWindow, int pathType);
     void Update(GameWindow* gameWindow);  //每帧调用
     inline bool IsAlive(){return status != Dead;}
+    void BeAttacked(int damage){curHealth -= damage;}
+
+    friend class Hero;
 
 private:
     void SwithPic();

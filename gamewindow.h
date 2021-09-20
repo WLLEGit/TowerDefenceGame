@@ -29,9 +29,9 @@ private:
 private:
     int row, col;
     QVector<QVector<Cell*>> cells;
-    QVector<Enemy*> enemies;
-    QVector<Tower*> towers;
-    QVector<FriendlyUnit*> heros;
+    QList<Enemy*> enemies;
+    QList<Tower*> towers;
+    QList<Hero*> heros;
 
     int round;
     int health;
@@ -50,16 +50,18 @@ private:
                 && (cells[r][c]->GetCellType() == Cell::Blocked || cells[r][c]->GetCellType() == Cell::Placable);}
     void RunMainloop();     //不断更新塔、敌人、友军的状态
     void UpdateOneFrame();
+    void OnHeroDead(Hero* hero);
 
 public:
     void OnPlacableClicked(int r, int c);
     inline Cell* GetAt(int r, int c);
     Cell* Locate(QLabel* src);
     QList<Cell*>* FindPath(Cell* start) {return pathMap[QPair<Cell*, Cell::CellType>(start, Cell::Path)];}
-    FriendlyUnit* FindPossibleFriendlyUnit(int r, int c);
+    Hero* FindPossibleFriendlyUnit(int r, int c);
     void EnemyHit(int damage);
     friend void Enemy::Update(GameWindow*);
     friend void Tower::Update(GameWindow*);
+    friend void Hero::Update(GameWindow*);
 };
 
 #endif // GAMEWINDOW_H
