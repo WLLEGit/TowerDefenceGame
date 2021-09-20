@@ -39,6 +39,8 @@ private:
 
     QTimer* fpsTimer;
 
+    QMap<Cell*, QList<Cell*>*> pathMap;
+
 private:
     void LoadMap(int id);
     void SetCellRsrcImg(int r, int c);
@@ -51,8 +53,8 @@ private:
 public:
     void OnPlacableClicked(int r, int c);
     Cell* Locate(QLabel* src);
-    Direction FindPath(int r, int c, int srcType, Direction preDir);
-    Cell* FindNextCell(int r, int c, int srcType, Direction preDir);
+    void InitPaths();
+    QList<Cell*>* FindPath(Cell* start) {return pathMap[start];}
     FriendlyUnit* FindPossibleFriendlyUnit(int r, int c);
     friend void Enemy::Update(GameWindow*);
 };

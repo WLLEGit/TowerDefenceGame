@@ -15,6 +15,8 @@
 #include<QMetaObject>
 #include<QTimer>
 #include<cmath>
+#include<QList>
+#include<QMap>
 
 constexpr int CELLWIDTH = 70;   //单元格像素大小
 constexpr int FPS = 30;         //帧率

@@ -26,7 +26,7 @@ private:
 
     QTimer* attackTimer;
 
-    Direction dir;
+    QList<Cell*> path;
     double speed;
     int pathType;
 
@@ -46,6 +46,7 @@ public:
 private:
     void SwithPic();
     void Attack();
+    void InitPath(GameWindow* gameWindow, Cell* start);
 };
 
 #endif // ENEMY_H
