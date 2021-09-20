@@ -39,25 +39,27 @@ private:
 
     QTimer* fpsTimer;
 
-    QMap<Cell*, QList<Cell*>*> pathMap;
+    QMap<QPair<Cell*, Cell::CellType>, QList<Cell*>*> pathMap;
 
 private:
     void LoadMap(int id);
     void LoadMapHelper(QTextStream& in, QString pathType, Cell::CellType cellType);
     void SetCellRsrcImg(int r, int c);
     void InitMapLabels();
-    inline bool HelperIsBlocked(int r, int c){return 0 <= r && r <= row && 0 <= c && c <= col \
+    inline bool HelperIsBlocked(int r, int c){return 0 <= r && r < row && 0 <= c && c < col \
                 && (cells[r][c]->GetCellType() == Cell::Blocked || cells[r][c]->GetCellType() == Cell::Placable);}
     void RunMainloop();     //不断更新塔、敌人、友军的状态
     void UpdateOneFrame();
 
 public:
     void OnPlacableClicked(int r, int c);
+    inline Cell* GetAt(int r, int c);
     Cell* Locate(QLabel* src);
-    QList<Cell*>* FindPath(Cell* start) {return pathMap[start];}
+    QList<Cell*>* FindPath(Cell* start) {return pathMap[QPair<Cell*, Cell::CellType>(start, Cell::Path)];}
     FriendlyUnit* FindPossibleFriendlyUnit(int r, int c);
     void EnemyHit(int damage);
     friend void Enemy::Update(GameWindow*);
+    friend void Tower::Update(GameWindow*);
 };
 
 #endif // GAMEWINDOW_H

@@ -39,7 +39,11 @@ void GameWindow::LoadMap(int id)
     {
         cells[i].resize(col);
         for(int j = 0; j < col; ++j)
+        {
             cells[i][j] = new Cell(0, 0, this, i, j);
+            cells[i][j]->show();
+        }
+
     }
 
     LoadMapHelper(in, "Red", Cell::Red);
@@ -76,7 +80,8 @@ void GameWindow::LoadMapHelper(QTextStream &in, QString newPathType, Cell::CellT
                 cells[r][c]->AddType(Cell::Start);
                 start = cells[r][c];
                 path = new QList<Cell*>();
-                pathMap[start] = path;
+                pathMap[QPair<Cell*, Cell::CellType>(start, cellType)] = path;
+                pathMap[QPair<Cell*, Cell::CellType>(start, Cell::Path)] = path;
             }
             else if(i == n-1)
                 cells[r][c]->AddType(Cell::End);
@@ -182,5 +187,13 @@ void GameWindow::UpdateOneFrame()
 
     for(auto& enemy : enemies)
         enemy->Update(this);
+}
+
+Cell *GameWindow::GetAt(int r, int c)
+{
+    if(0 > r && r >= row && 0 > c && c >= col)
+        return nullptr;
+    else
+        return cells[r][c];
 }
 

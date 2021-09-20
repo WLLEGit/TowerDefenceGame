@@ -43,6 +43,7 @@ public:
 
     static Enemy* GenerateEnemy(int type, QWidget* parent, Cell* bornCell, GameWindow* gameWindow, int pathType);
     void Update(GameWindow* gameWindow);  //每帧调用
+    inline bool IsAlive(){return status != Dead;}
 
 private:
     void SwithPic();

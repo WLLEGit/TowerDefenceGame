@@ -18,6 +18,8 @@
 #include<QList>
 #include<QMap>
 
+#define DISTANCE(x,y) (sqrt((x)*(x)+(y)*(y)))
+
 constexpr int CELLWIDTH = 70;   //单元格像素大小
 constexpr int FPS = 30;         //帧率
 

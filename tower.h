@@ -7,17 +7,45 @@
 
 class Tower : public QLabel     //塔
 {
-private:
+protected:
     int cost;
     int level;
     int range;
     double attack;
     double attackInterval;
-    Enemy* target;
+    Enemy* target=nullptr;
+    Cell* locationCell;
+    QString towerPicPrefix;
+    QString bulletPicPrefix;
+    QPixmap towerpic;
+    int rotation;
+
+    QTimer attackTimer;
+
+protected:
+    inline bool InRange(int x, int y);
+    void Attack();
 
 public:
-    Tower(QWidget* parent=nullptr, int cost=0, int level=0, int range=0, double attack=0, double attackInterval=0);
+    Tower(QWidget* parent=nullptr, int cost=0, int level=0, int range=0, double attack=0, double attackInterval=0, Cell* locationCell=nullptr);
+    void Update(GameWindow* gameWindow);
+    void Upgrade(); //升级
 };
+
+class ArrowTower : public Tower     //箭塔
+{
+public:
+    ArrowTower(QWidget* parent, Cell* locationCell);
+};
+
+class MissleTower : public Tower    //炮塔
+{
+public:
+    MissleTower(QWidget* parent, Cell* locationCell);
+};
+
+
+
 
 class FriendlyUnit : public QLabel  //友方单位
 {
@@ -53,15 +81,5 @@ public:
     Bullet(QWidget* parent=nullptr);
 };
 
-class ArrowTower : public Tower     //箭塔
-{
-public:
-
-};
-
-class MissleTower : public Tower    //炮塔
-{
-
-};
 
 #endif // TOWER_H
