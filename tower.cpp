@@ -4,7 +4,7 @@
 
 bool Tower::InRange(int x, int y)
 {
-    return DISTANCE(x-this->x(), y-this->y()) <= CELLWIDTH * (range+0.2);
+    return DISTANCE(x-(this->x() + CELLWIDTH/2), y-(this->y()+CELLWIDTH/2)) <= CELLWIDTH * (range+0.2);
 }
 
 void Tower::Attack()
@@ -21,7 +21,7 @@ void Tower::Attack()
 }
 
 Tower::Tower(QWidget *parent, int cost, int level, int range, double attack, double attackInterval, Cell* locationCell)
-    :QLabel(parent), cost(cost), level(level), range(range), attack(attack), attackInterval(attackInterval), locationCell(locationCell)
+    :QLabel(parent), cost(cost), level(level), range(range), attack(attack), attackInterval(attackInterval), posCell(locationCell)
 {
     connect(&attackTimer, &QTimer::timeout, this, &Tower::Attack);
     setGeometry(locationCell->x(), locationCell->y(), CELLWIDTH*1.2, CELLWIDTH*1.2);
@@ -64,9 +64,15 @@ void Tower::Upgrade()
     setPixmap(towerpic);
 }
 
+void Tower::mousePressEvent(QMouseEvent *ev)
+{
+    emit TowerPressed(this);
+    QLabel::mousePressEvent(ev);
+}
+
 
 ArrowTower::ArrowTower(QWidget *parent, Cell* locationCell) //dps=4
-    :    Tower(parent, 100, 1, 2, 2, 0.5, locationCell)
+    :    Tower(parent, ARROWCOST, 1, 2, 2, 0.5, locationCell)
 {
     towerPicPrefix = ":/assets/towers/MG%1.png";
     towerpic = QPixmap(towerPicPrefix.arg(level));
@@ -76,7 +82,7 @@ ArrowTower::ArrowTower(QWidget *parent, Cell* locationCell) //dps=4
 }
 
 MissleTower::MissleTower(QWidget *parent, Cell* locationCell)   //dps=6
-    :    Tower(parent, 150, 1, 5, 6, 1, locationCell)
+    :    Tower(parent, MISSILECOST, 1, 5, 6, 1, locationCell)
 {
     towerPicPrefix = ":/assets/towers/Missile_Launcher%1.png";
     towerpic = QPixmap(towerPicPrefix.arg(level));
@@ -94,6 +100,7 @@ Hero::Hero(QWidget *parent, Cell* posCell, int maxCapacity, int attack, \
     setGeometry(posCell->x(), posCell->y(), CELLWIDTH, CELLWIDTH);
 
     target = nullptr;
+    isDestoried = false;
 
     curIndex = 0;
     maxIndex = 4;
@@ -115,7 +122,6 @@ Hero::Hero(QWidget *parent, Cell* posCell, int maxCapacity, int attack, \
     healthBar->setMaximum(100);
     healthBar->setStyleSheet("QProgressBar{background:rgba(255,255,255,0);} QProgressBar::chunk{border-radius:5px;background:red}");
     healthBar->setTextVisible(false);
-    DrawHealthLine();
 }
 
 void Hero::AddEnemy(Enemy *enemy)
@@ -147,19 +153,28 @@ void Hero::Attack()
 
 bool Hero::InRange(int x, int y)
 {
-    return DISTANCE(x-this->x(), y-this->y()) <= CELLWIDTH * (double)(range - 0.5);
+    return DISTANCE(x-(this->x()+CELLWIDTH/2), y-(this->y()+CELLWIDTH/2)) <= CELLWIDTH * (double)(range - 0.5);
 }
 
 void Hero::DrawHealthLine()
 {
     healthBar->setGeometry(x(), y()-CELLWIDTH/10, CELLWIDTH*0.8, CELLWIDTH/10);
     healthBar->setValue((float)curHealth/maxHealth * 100);
+    healthBar->update();
 }
 
 void Hero::Update(GameWindow* gameWindow)
 {
+    if(isDestoried)
+        return;
+
     if(curHealth <= 0)
+    {
+        this->hide();
+        healthBar->hide();
+        isDestoried = true;
         emit HeroDead(nullptr);
+    }
     if(!target || !target->IsAlive() || !InRange(target->x(), target->y()))
     {
         target = nullptr;
@@ -192,11 +207,11 @@ Hero *Hero::GenerateHero(QWidget *parent, Cell *posCell, int type)
 }
 
 Hero1::Hero1(QWidget *parent, Cell *posCell)
-    :Hero(parent, posCell, 3, 10, 50, 0.8, "one", 2, 200)
+    :Hero(parent, posCell, 3, 5, 50, 0.8, "one", 2, HERO1COST)
 {
 }
 
 Hero2::Hero2(QWidget *parent, Cell *posCell)
-    :Hero(parent, posCell, 2, 20, 25, 0.8, "two", 1, 200)
+    :Hero(parent, posCell, 2, 10, 25, 0.8, "two", 1, HERO2COST)
 {
 }

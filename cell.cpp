@@ -7,6 +7,12 @@ Cell::Cell(int type, int resourceType, QWidget* parent, int r, int c)
     SetType(type);
 }
 
+void Cell::mousePressEvent(QMouseEvent *ev)
+{
+    emit CellPressed(this);
+    QLabel::mousePressEvent(ev);
+}
+
 void Cell::SetType(int type)
 {
     this->type = type;

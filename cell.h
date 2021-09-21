@@ -36,8 +36,13 @@ public:
     inline int row(){return r;}
     inline int col(){return c;}
 
+    void mousePressEvent(QMouseEvent *ev) override;
+
 private:
     void SetType(int type);
+
+signals:
+    void CellPressed(Cell*);
 
 };
 

@@ -9,21 +9,30 @@ GameWindow::GameWindow(QWidget *parent, int mapID) :
 {
     ui->setupUi(this);
 
+    //init map
     LoadMap(mapID);
     InitMapLabels();
 
+    setFixedHeight(CELLWIDTH*row);
+
     //-------------------Test Units--------------
     enemies.push_back(Enemy::GenerateEnemy(1, this, cells[1][11], this, 20));
-    towers.push_back(new MissleTower(this, cells[3][10]));
-    auto hero = Hero::GenerateHero(this, cells[6][10], 1);
-    heros.push_back(hero);
-    connect(hero, &Hero::HeroDead, this, &GameWindow::OnHeroDead);
+    //CreatHero(1, cells[6][10]);
     //------------------------------------------
 
-    this->setFixedSize(col * CELLWIDTH, row * CELLWIDTH);
+    connect(ui->undoSelectBtn, &QPushButton::clicked, this, [=](){UnitSelected(0);});
+    connect(ui->hero1, &QPushButton::clicked, this, [=](){UnitSelected(0x11);});
+    connect(ui->hero2, &QPushButton::clicked, this, [=](){UnitSelected(0x12);});
+    connect(ui->arrowTower, &QPushButton::clicked, this, [=](){UnitSelected(0x21);});
+    connect(ui->missileTower, &QPushButton::clicked, this, [=](){UnitSelected(0x22);});
 
+
+    //ui main loop
     fpsTimer = new QTimer(this);
     connect(fpsTimer, &QTimer::timeout, this, &GameWindow::UpdateOneFrame);
+
+    resourceTimer = new QTimer(this);
+    connect(resourceTimer, &QTimer::timeout, this, &GameWindow::UpdateResource);
 
     RunMainloop();
 }
@@ -48,6 +57,7 @@ void GameWindow::LoadMap(int id)
         for(int j = 0; j < col; ++j)
         {
             cells[i][j] = new Cell(0, 0, this, i, j);
+            connect(cells[i][j], &Cell::CellPressed, this, &GameWindow::OnCellPressed);
             cells[i][j]->show();
         }
 
@@ -182,6 +192,43 @@ void GameWindow::EnemyHit(int damage)
     health -= damage;
 }
 
+bool GameWindow::CanCellPlaceHero(Cell * c)
+{
+    if(c->GetCellType() != Cell::Path)
+        return false;
+
+    for(auto& hero : heros)
+        if(hero->GetPositionCell() == c)
+            return false;
+
+    return true;
+}
+
+bool GameWindow::CanCellPlaceTower(Cell *cell)
+{
+    if(cell->GetCellType() != Cell::Placable)
+        return false;
+
+    for(auto& tower : towers)
+        if(tower->GetPositionCell() == cell)
+            return false;
+
+    return true;
+}
+
+bool GameWindow::IsCellHasTower(Cell *cell)
+{
+    if(cell->GetCellType() != Cell::Placable)
+        return false;
+
+    for(auto& tower : towers)
+        if(tower->GetPositionCell() == cell)
+            return true;
+
+    return false;
+}
+
+
 void GameWindow::RunMainloop()
 {
     fpsTimer->start(1000/FPS);
@@ -190,7 +237,12 @@ void GameWindow::RunMainloop()
 void GameWindow::UpdateOneFrame()
 {
     if(gameStatus != Running)
+    {
+        resourceTimer->stop();
         return;
+    }
+    if(!resourceTimer->isActive())
+        resourceTimer->start(RESOURCEUPDATEDURATION);
 
     for(auto& enemy : enemies)
         enemy->Update(this);
@@ -205,9 +257,97 @@ void GameWindow::UpdateOneFrame()
 
 void GameWindow::OnHeroDead(Hero *hero)
 {
-    delete hero->healthBar;
-    delete hero;
     heros.removeOne(hero);
+}
+
+void GameWindow::UnitSelected(int type)
+{
+    if(type == 0)   //reset
+    {
+        ui->label->setText("");
+        waitToPlaceType = -1;
+        waitToCost = 0;
+    }
+    else if(type & 0x10)    //hero
+    {
+        UnitSelected(0);
+        int cost = (type == 0x11 ? HERO1COST : (type == 0x12 ? HERO2COST : 10000));
+        if(money >= cost)
+        {
+            ui->label->setText(QString("Hero%1 Selected").arg(type&0xf));
+            waitToPlaceType = type;
+            waitToCost = cost;
+        }
+    }
+    else if(type & 0x20)    //tower
+    {
+        UnitSelected(0);
+        int cost = type == 0x21 ? ARROWCOST : (type == 0x22 ? MISSILECOST : 10000);
+        if(money >= cost)
+        {
+            ui->label->setText(QString("%1Tower Selected").arg(type == 0x21 ? "Arrow" : (type == 0x22 ? "Missile" : "UNKNOWN")));
+            waitToPlaceType = type;
+            waitToCost = cost;
+        }
+    }
+}
+
+void GameWindow::OnCellPressed(Cell* cell)
+{
+    qDebug() << "Cell Pressed" << cell->row() << cell->col();
+    if((waitToPlaceType & 0x10) && CanCellPlaceHero(cell)) //放置英雄
+    {
+        CreatHero(waitToPlaceType & 0xf, cell);
+        money -= waitToCost;
+        UnitSelected(0);
+    }
+    else if((waitToPlaceType & 0x20) && CanCellPlaceTower(cell))  //放置塔
+    {
+        CreatTower(waitToPlaceType & 0xf, cell);
+        money -= waitToCost;
+        UnitSelected(0);
+    }
+}
+
+void GameWindow::OnTowerPressed(Tower* tower)
+{
+    if((waitToPlaceType & 0x20) && ((waitToPlaceType & 0xf) == tower->Type()) && tower->Level() < TOWERMAXLEVEL)
+    {
+        tower->Upgrade();
+        money -= waitToCost;
+        UnitSelected(0);
+    }
+}
+
+Hero* GameWindow::CreatHero(int type, Cell* cell)
+{
+    qDebug() << "CreatHero" << type << cell->row() << cell->col();
+    auto hero = Hero::GenerateHero(this, cell, type);
+    hero->Show();
+    heros.push_back(hero);
+    connect(hero, &Hero::HeroDead, this, &GameWindow::OnHeroDead);
+    return hero;
+}
+
+Tower *GameWindow::CreatTower(int type, Cell *cell)
+{
+    Tower* t=nullptr;
+    if(type == 1)
+        t = new ArrowTower(this, cell);
+    else if(type == 2)
+        t = new MissleTower(this, cell);
+    else
+        t = new ArrowTower(this, cell);
+    t->show();
+    connect(t, &Tower::TowerPressed, this, &GameWindow::OnTowerPressed);
+    towers.push_back(t);
+    return t;
+}
+
+void GameWindow::UpdateResource()
+{
+    money += 10;
+    ui->resourceLabel->setText(QString("生命值: %1\n资源: %2").arg(health).arg(money));
 }
 
 

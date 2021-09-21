@@ -15,7 +15,7 @@ protected:
     double attack;
     double attackInterval;
     Enemy* target=nullptr;
-    Cell* locationCell;
+    Cell* posCell;
     QString towerPicPrefix;
     QString bulletPicPrefix;
     QPixmap towerpic;
@@ -28,22 +28,35 @@ protected:
     void Attack();
 
 public:
-    Tower(QWidget* parent=nullptr, int cost=0, int level=0, int range=0, double attack=0, double attackInterval=0, Cell* locationCell=nullptr);
+    Tower(QWidget* parent=nullptr, int cost=0, int level=0, int range=0, double attack=0, double attackInterval=0, Cell* posCell=nullptr);
     void Update(GameWindow* gameWindow);
     void Upgrade(); //升级
+    inline Cell* GetPositionCell(){return posCell;}
+    inline int Level(){return level;}
+    inline int Type(){return 0;}
+
+    void mousePressEvent(QMouseEvent *ev) override;
+
+
+    int Cost(){return cost;}
+
+signals:
+    void TowerPressed(Tower*);
 
 };
 
 class ArrowTower : public Tower     //箭塔
 {
 public:
-    ArrowTower(QWidget* parent, Cell* locationCell);
+    ArrowTower(QWidget* parent, Cell* posCell);
+    inline int Type(){return 1;}
 };
 
 class MissleTower : public Tower    //炮塔
 {
 public:
-    MissleTower(QWidget* parent, Cell* locationCell);
+    MissleTower(QWidget* parent, Cell* posCell);
+    inline int Type(){return 2;}
 };
 
 
@@ -62,7 +75,7 @@ public:
     void AddEnemy(Enemy* enemy);
     void RemoveEnemy(Enemy* enemy);
 
-    void BeAttacked(int damage){curHealth -= damage;}
+    inline void BeAttacked(int damage){curHealth -= damage; DrawHealthLine();}
     bool IsAlive(){return curHealth > 0;}
     inline float GetHealthRate(){return (float)curHealth / maxHealth;}
 
@@ -70,8 +83,14 @@ public:
 
     static Hero* GenerateHero(QWidget* parent, Cell* posCell, int type);
 
+    int Cost(){return cost;}
+
+    void Show(){show(); healthBar->show();}
+
 
 protected:
+    bool isDestoried;
+
     Cell* posCell;
     int capacity;
     int maxCapacity;

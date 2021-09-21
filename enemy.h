@@ -48,13 +48,16 @@ public:
     static Enemy* GenerateEnemy(int type, QWidget* parent, Cell* bornCell, GameWindow* gameWindow, int pathType);
     void Update(GameWindow* gameWindow);  //每帧调用
     inline bool IsAlive(){return status != Dead;}
+    int tmp =0;
     void BeAttacked(int damage){curHealth -= damage;}
     inline float GetHealthRate(){return (float)curHealth / maxHealth;}
+    void OnDead(){this->hide(); healthBar->hide();attackTimer->stop();}
+    void Show(){show(); healthBar->show();}
 
 
 private:
     void SwithPic();
-    void Attack();
+    inline void Attack();
     void InitPath(GameWindow* gameWindow, Cell* start);
 };
 

@@ -27,6 +27,16 @@
 constexpr int CELLWIDTH = 70;   //单元格像素大小
 constexpr int FPS = 30;         //帧率
 
+constexpr int HERO1COST=200;
+constexpr int HERO2COST=200;
+constexpr int ARROWCOST=100;
+constexpr int MISSILECOST=150;
+
+constexpr int TOWERMAXLEVEL = 3;
+constexpr int RESOURCEUPDATEDURATION = 400; //ms
+
+
+
 enum class Direction{Left, Down, Up, Right, None};
 
 extern QImage MergeImage(const QImage& baseImage, const QImage& overlayImage);  //合并两张图片
