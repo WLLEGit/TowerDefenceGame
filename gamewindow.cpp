@@ -9,16 +9,15 @@ GameWindow::GameWindow(QWidget *parent, int mapID) :
 {
     ui->setupUi(this);
 
+    round = 0;
+    health = 10;
+    money = 500;
+
     //init map
     LoadMap(mapID);
     InitMapLabels();
 
     setFixedHeight(CELLWIDTH*row);
-
-    //-------------------Test Units--------------
-    enemies.push_back(Enemy::GenerateEnemy(1, this, cells[1][11], this, 20));
-    //CreatHero(1, cells[6][10]);
-    //------------------------------------------
 
     connect(ui->undoSelectBtn, &QPushButton::clicked, this, [=](){UnitSelected(0);});
     connect(ui->hero1, &QPushButton::clicked, this, [=](){UnitSelected(0x11);});
@@ -33,6 +32,10 @@ GameWindow::GameWindow(QWidget *parent, int mapID) :
 
     resourceTimer = new QTimer(this);
     connect(resourceTimer, &QTimer::timeout, this, &GameWindow::UpdateResource);
+
+    enemyTimer = new QTimer(this);
+    connect(enemyTimer, &QTimer::timeout, this, [=](){CreateEnemy(1, cells[1][11]);});
+    enemyTimer->start(2000);
 
     RunMainloop();
 }
@@ -228,6 +231,14 @@ bool GameWindow::IsCellHasTower(Cell *cell)
     return false;
 }
 
+Bullet* GameWindow::CreateBullet(Enemy *target, Tower *src, int speed, int damage, QPixmap pic)
+{
+    Bullet* bullet = new Bullet(this, target, src, speed, damage, pic);
+    connect(bullet, &Bullet::HitEnemy, this, &GameWindow::OnBulletHitEnemy);
+    bullets.push_back(bullet);
+    return bullet;
+}
+
 
 void GameWindow::RunMainloop()
 {
@@ -239,10 +250,14 @@ void GameWindow::UpdateOneFrame()
     if(gameStatus != Running)
     {
         resourceTimer->stop();
+        enemyTimer->stop();
         return;
     }
     if(!resourceTimer->isActive())
+    {
         resourceTimer->start(RESOURCEUPDATEDURATION);
+        enemyTimer->start(2000);
+    }
 
     for(auto& enemy : enemies)
         enemy->Update(this);
@@ -253,11 +268,14 @@ void GameWindow::UpdateOneFrame()
     for(auto& hero : heros)
         hero->Update(this);
 
+    for(auto& bullet : bullets)
+        bullet->Update(this);
+
 }
 
-void GameWindow::OnHeroDead(Hero *hero)
+bool GameWindow::OnHeroDead(Hero *hero)
 {
-    heros.removeOne(hero);
+    return heros.removeOne(hero);
 }
 
 void GameWindow::UnitSelected(int type)
@@ -297,13 +315,13 @@ void GameWindow::OnCellPressed(Cell* cell)
     qDebug() << "Cell Pressed" << cell->row() << cell->col();
     if((waitToPlaceType & 0x10) && CanCellPlaceHero(cell)) //放置英雄
     {
-        CreatHero(waitToPlaceType & 0xf, cell);
+        CreateHero(waitToPlaceType & 0xf, cell);
         money -= waitToCost;
         UnitSelected(0);
     }
     else if((waitToPlaceType & 0x20) && CanCellPlaceTower(cell))  //放置塔
     {
-        CreatTower(waitToPlaceType & 0xf, cell);
+        CreateTower(waitToPlaceType & 0xf, cell);
         money -= waitToCost;
         UnitSelected(0);
     }
@@ -319,7 +337,20 @@ void GameWindow::OnTowerPressed(Tower* tower)
     }
 }
 
-Hero* GameWindow::CreatHero(int type, Cell* cell)
+void GameWindow::OnBulletHitEnemy(Bullet *bullet)
+{
+    assert(bullet->GetTarget());
+    Enemy* target = bullet->GetTarget();
+    if(target->IsAlive())
+    {
+        target->BeAttacked(bullet->GetDamage());
+    }
+    bullet->hide();
+    bullets.removeOne(bullet);
+    delete bullet;
+}
+
+Hero* GameWindow::CreateHero(int type, Cell* cell)
 {
     qDebug() << "CreatHero" << type << cell->row() << cell->col();
     auto hero = Hero::GenerateHero(this, cell, type);
@@ -329,7 +360,7 @@ Hero* GameWindow::CreatHero(int type, Cell* cell)
     return hero;
 }
 
-Tower *GameWindow::CreatTower(int type, Cell *cell)
+Tower *GameWindow::CreateTower(int type, Cell *cell)
 {
     Tower* t=nullptr;
     if(type == 1)
@@ -342,6 +373,15 @@ Tower *GameWindow::CreatTower(int type, Cell *cell)
     connect(t, &Tower::TowerPressed, this, &GameWindow::OnTowerPressed);
     towers.push_back(t);
     return t;
+}
+
+Enemy *GameWindow::CreateEnemy(int type, Cell *cell)
+{
+    Enemy* e = Enemy::GenerateEnemy(type, this, cell, this, 20);
+    e->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    enemies.push_back(e);
+    e->Show();
+    return e;
 }
 
 void GameWindow::UpdateResource()

@@ -41,5 +41,7 @@ enum class Direction{Left, Down, Up, Right, None};
 
 extern QImage MergeImage(const QImage& baseImage, const QImage& overlayImage);  //合并两张图片
 
+extern QPixmap RotatePixmap(const QPixmap& pixmap, QLabel* target, QLabel* src);
+
 
 #endif // HEADER_H

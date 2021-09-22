@@ -81,6 +81,8 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
 
 void Enemy::Update(GameWindow *gameWindow)
 {
+    if(status == Dead)
+        return;
     if(curHealth <= 0)
     {
         status = Dead;
@@ -134,6 +136,15 @@ void Enemy::Update(GameWindow *gameWindow)
     DrawHealthLine();
 }
 
+void Enemy::OnDead()
+{
+    this->hide();
+    healthBar->hide();
+    attackTimer->stop();
+    if(target && target->IsAlive())
+        target->RemoveEnemy(this);
+}
+
 
 void Enemy::SwithPic()
 {
@@ -146,13 +157,13 @@ void Enemy::SwithPic()
 
 void Enemy::Attack()
 {
-        if(target && target->IsAlive())
-        {
-            target->BeAttacked(attack);
-        }
-        else
-        {
-            target = nullptr;
-            attackTimer->stop();
-        }
+    if(target && target->IsAlive())
+    {
+        target->BeAttacked(attack);
+    }
+    else
+    {
+        target = nullptr;
+        attackTimer->stop();
+    }
 }

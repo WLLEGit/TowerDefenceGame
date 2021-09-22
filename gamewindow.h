@@ -5,6 +5,7 @@
 #include "header.h"
 #include "tower.h"
 #include "cell.h"
+#include "hero.h"
 
 class Enemy;
 
@@ -32,6 +33,7 @@ private:
     QList<Enemy*> enemies;
     QList<Tower*> towers;
     QList<Hero*> heros;
+    QList<Bullet*> bullets;
 
     int round;
     int health;
@@ -39,11 +41,9 @@ private:
 
     QTimer* fpsTimer;
     QTimer* resourceTimer;
+    QTimer* enemyTimer;
 
     QMap<QPair<Cell*, Cell::CellType>, QList<Cell*>*> pathMap;
-
-    Tower* towerSelected;
-    Cell* cellSelected;
 
     int waitToPlaceType;    //等待放置的单位
     int waitToCost;         //将要消耗的资金
@@ -57,16 +57,19 @@ private:
                 && (cells[r][c]->GetCellType() == Cell::Blocked || cells[r][c]->GetCellType() == Cell::Placable);}
     void RunMainloop();     //不断更新塔、敌人、友军的状态
     void UpdateOneFrame();
-    void OnHeroDead(Hero* hero);
+    bool OnHeroDead(Hero* hero);
     void UnitSelected(int type);
 
     void OnCellPressed(Cell *);
     void OnTowerPressed(Tower *);
+    void OnBulletHitEnemy(Bullet*);
 
-    Hero* CreatHero(int type, Cell* cell);
-    Tower* CreatTower(int type, Cell* cell);
+    Hero* CreateHero(int type, Cell* cell);
+    Tower* CreateTower(int type, Cell* cell);
+    Enemy* CreateEnemy(int type, Cell* cell);
 
     void UpdateResource();
+
 
 public:
     void OnPlacableClicked(int r, int c);
@@ -79,6 +82,8 @@ public:
     bool CanCellPlaceHero(Cell*); //判断能否放置英雄
     bool CanCellPlaceTower(Cell* cell); //判断能否放置塔
     bool IsCellHasTower(Cell* cell);    //判断是否存在塔
+
+    Bullet* CreateBullet(Enemy* target, Tower* src, int speed, int damage, QPixmap pic);
 
 
     friend void Enemy::Update(GameWindow*);

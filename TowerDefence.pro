@@ -20,6 +20,7 @@ SOURCES += \
     enemy.cpp \
     gamewindow.cpp \
     header.cpp \
+    hero.cpp \
     main.cpp \
     mainwindow.cpp \
     tower.cpp
@@ -29,6 +30,7 @@ HEADERS += \
     enemy.h \
     gamewindow.h \
     header.h \
+    hero.h \
     mainwindow.h \
     tower.h
 

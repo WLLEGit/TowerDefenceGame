@@ -19,3 +19,12 @@ QImage MergeImage(const QImage& baseImage, const QImage& overlayImage)  //合并
 
     return imageWithOverlay;
 }
+
+QPixmap RotatePixmap(const QPixmap &pixmap, QLabel *target, QLabel *src)
+{
+    double dx=target->x()-src->x(), dy=src->y()-target->y();
+    double dis = DISTANCE(dx, dy);
+    double Sin= dx/dis, Cos=dy/dis;
+    QMatrix mat(Cos, Sin, -Sin, Cos, 0, 0);
+    return pixmap.transformed(mat);
+}

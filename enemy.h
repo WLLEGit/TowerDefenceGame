@@ -51,7 +51,7 @@ public:
     int tmp =0;
     void BeAttacked(int damage){curHealth -= damage;}
     inline float GetHealthRate(){return (float)curHealth / maxHealth;}
-    void OnDead(){this->hide(); healthBar->hide();attackTimer->stop();}
+    void OnDead();
     void Show(){show(); healthBar->show();}
 
 
