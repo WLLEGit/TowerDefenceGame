@@ -11,7 +11,6 @@ void Tower::Attack(GameWindow *gameWindow)
 {
     if(target && target->IsAlive())
     {
-        qDebug() << "Attack";
         gameWindow->CreateBullet(target, this, bulletSpeed, attack, QPixmap(bulletPicPath).scaledToHeight(bulletLength));
     }
     else
@@ -25,8 +24,9 @@ void Tower::Attack(GameWindow *gameWindow)
 Tower::Tower(QWidget *parent, int cost, int level, int range, double attack, double attackInterval, Cell* locationCell)
     :QLabel(parent), cost(cost), level(level), range(range), attack(attack), attackInterval(attackInterval), posCell(locationCell)
 {
-    connect(&attackTimer, &QTimer::timeout, this, &Tower::Attack);
+    connect(&attackTimer, &QTimer::timeout, this, [=](){toAttack=true;});
     setGeometry(locationCell->x(), locationCell->y(), CELLWIDTH*1.2, CELLWIDTH*1.2);
+    toAttack = false;
 }
 
 void Tower::Update(GameWindow* gameWindow)
@@ -43,6 +43,11 @@ void Tower::Update(GameWindow* gameWindow)
     }
     if(target)
     {
+        if(toAttack)
+        {
+            Attack(gameWindow);
+            toAttack = false;
+        }
         if(!attackTimer.isActive())
         {
             Attack(gameWindow);
@@ -71,10 +76,10 @@ void Tower::mousePressEvent(QMouseEvent *ev)
 
 
 ArrowTower::ArrowTower(QWidget *parent, Cell* locationCell) //dps=4
-    :    Tower(parent, ARROWCOST, 1, 2, 2, 0.5, locationCell)
+    :    Tower(parent, ARROWCOST, 1, 2, 1, 0.2, locationCell)
 {
     bulletSpeed = CELLWIDTH;
-    bulletLength = CELLWIDTH / 4;
+    bulletLength = CELLWIDTH / 3;
     towerPicPrefix = ":/assets/towers/MG%1.png";
     towerpic = QPixmap(towerPicPrefix.arg(level));
     towerpic = towerpic.scaledToHeight(CELLWIDTH);
@@ -83,7 +88,7 @@ ArrowTower::ArrowTower(QWidget *parent, Cell* locationCell) //dps=4
 }
 
 MissleTower::MissleTower(QWidget *parent, Cell* locationCell)   //dps=6
-    :    Tower(parent, MISSILECOST, 1, 5, 6, 1, locationCell)
+    :    Tower(parent, MISSILECOST, 1, 5, 6, 2, locationCell)
 {
     bulletSpeed = CELLWIDTH * 0.7;
     bulletLength = CELLWIDTH * 0.7;
@@ -99,7 +104,10 @@ MissleTower::MissleTower(QWidget *parent, Cell* locationCell)   //dps=6
 Bullet::Bullet(QWidget *parent, Enemy *target, Tower *sender, int speed, int damage, QPixmap pic)
     :QLabel(parent), target(target), sender(sender), speed(speed), damage(damage), pic(pic)
 {
+    setAttribute(Qt::WA_TransparentForMouseEvents, true);   //对鼠标事件穿透
+
     isHit = false;
+    this->setGeometry(sender->x(), sender->y(), CELLWIDTH*1.5, CELLWIDTH*1.5);
 }
 
 void Bullet::Update(GameWindow *)
@@ -108,7 +116,7 @@ void Bullet::Update(GameWindow *)
         return;
 
     double deltaX= target->x()-x();
-    double deltaY=target->y()- y();
+    double deltaY= target->y()- y();
     double dis = DISTANCE(deltaX, deltaY);
     if(!target->IsAlive() || dis <= speed)
     {
@@ -117,6 +125,6 @@ void Bullet::Update(GameWindow *)
         return;
     }
     setPixmap(RotatePixmap(pic, target, this));
-    setGeometry(x() + deltaX / dis * speed, deltaY / dis * speed, this->width(), this->height());
+    setGeometry(x() + deltaX / dis * speed, y() + deltaY / dis * speed, this->width(), this->height());
 
 }

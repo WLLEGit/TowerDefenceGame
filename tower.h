@@ -26,6 +26,8 @@ protected:
 
     QTimer attackTimer;
 
+    bool toAttack;
+
 protected:
     inline bool InRange(int x, int y);
     void Attack(GameWindow* gameWindow);
@@ -78,8 +80,8 @@ private:
 public:
     Bullet(QWidget* parent, Enemy* target, Tower* sender, int speed, int damage, QPixmap pic);
     void Update(GameWindow* gameWindow);
-    inline int GetDamage(){return damage;}
-    inline Enemy* GetTarget(){return target;}
+    int GetDamage(){return damage;}
+    Enemy* GetTarget(){return target;}
 
 signals:
     void HitEnemy(Bullet*);

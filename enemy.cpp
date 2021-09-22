@@ -7,6 +7,8 @@ Enemy::Enemy(QWidget* parent, double health, double attack, int dealHealthDamage
       rangedDamageRate(rangedDamageRate), closeDamageRate(closeDamageRate), attackInterval(attackInterval), \
       attackRange(attackRange), speed(speed)
 {
+    setAttribute(Qt::WA_TransparentForMouseEvents, true);   //对鼠标事件穿透
+
     picTimer = new QTimer;
     attackTimer = new QTimer();
 

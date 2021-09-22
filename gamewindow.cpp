@@ -3,6 +3,11 @@
 
 #include<iostream>
 
+/*TODO:
+ * BUG: 竖直道路上的怪物判定似乎有问题，发现不了路上的卫士
+ * 完成怪物生成机制
+ */
+
 GameWindow::GameWindow(QWidget *parent, int mapID) :
     QMainWindow(parent),
     ui(new Ui::GameWindow)
@@ -18,6 +23,9 @@ GameWindow::GameWindow(QWidget *parent, int mapID) :
     InitMapLabels();
 
     setFixedHeight(CELLWIDTH*row);
+
+    ui->label->setAlignment(Qt::AlignCenter);
+
 
     connect(ui->undoSelectBtn, &QPushButton::clicked, this, [=](){UnitSelected(0);});
     connect(ui->hero1, &QPushButton::clicked, this, [=](){UnitSelected(0x11);});
@@ -235,6 +243,7 @@ Bullet* GameWindow::CreateBullet(Enemy *target, Tower *src, int speed, int damag
 {
     Bullet* bullet = new Bullet(this, target, src, speed, damage, pic);
     connect(bullet, &Bullet::HitEnemy, this, &GameWindow::OnBulletHitEnemy);
+    bullet->show();
     bullets.push_back(bullet);
     return bullet;
 }
@@ -257,6 +266,12 @@ void GameWindow::UpdateOneFrame()
     {
         resourceTimer->start(RESOURCEUPDATEDURATION);
         enemyTimer->start(2000);
+    }
+    if(health <= 0)
+    {
+        gameStatus = Paused;
+        ui->label->setText("GameEnd");
+        ui->label->setStyleSheet("color:red;");
     }
 
     for(auto& enemy : enemies)
@@ -378,7 +393,6 @@ Tower *GameWindow::CreateTower(int type, Cell *cell)
 Enemy *GameWindow::CreateEnemy(int type, Cell *cell)
 {
     Enemy* e = Enemy::GenerateEnemy(type, this, cell, this, 20);
-    e->setAttribute(Qt::WA_TransparentForMouseEvents, true);
     enemies.push_back(e);
     e->Show();
     return e;
