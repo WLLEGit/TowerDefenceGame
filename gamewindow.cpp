@@ -4,8 +4,8 @@
 #include<iostream>
 
 /*TODO:
- * BUG: 竖直道路上的怪物判定似乎有问题，发现不了路上的卫士
- * 完成怪物生成机制
+ * 完成怪物生成机制5
+ * BUG：怪物移动有时候会超出道路
  */
 
 GameWindow::GameWindow(QWidget *parent, int mapID) :
@@ -184,8 +184,8 @@ void GameWindow::InitMapLabels()
 Cell *GameWindow::Locate(QLabel *src)
 {
     //src 与 Cell 需要在同一个父控件中
-    int r = src->y() / CELLWIDTH;
-    int c = src->x() / CELLWIDTH;
+    int r = (src->y() + CELLWIDTH/2) / CELLWIDTH;
+    int c = (src->x() + CELLWIDTH/2) / CELLWIDTH;
     return cells[r][c];
 }
 

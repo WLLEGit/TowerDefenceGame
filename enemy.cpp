@@ -108,11 +108,10 @@ void Enemy::Update(GameWindow *gameWindow)
     }
     Cell* nextCell = (*path)[posIndex + 1];
 
-    //Update Status
-    Hero* barrierFU = gameWindow->FindPossibleFriendlyUnit(posCell->row(), posCell->col());
-    if(barrierFU)
+    if(status != Fighting || !target || !target->IsAlive())   //如果在战斗中则不寻找新的状态
     {
-        if(target != barrierFU)
+        Hero* barrierFU = gameWindow->FindPossibleFriendlyUnit(posCell->row(), posCell->col());
+        if(barrierFU)
         {
             status = Fighting;
             barrierFU->AddEnemy(this);
@@ -121,20 +120,21 @@ void Enemy::Update(GameWindow *gameWindow)
             if(!attackTimer->isActive())
                 attackTimer->start(attackInterval * 1000);
         }
-    }
-    else
-    {
-        status = Moving;
-        if(attackTimer->isActive())
-            attackTimer->stop();
+        else
+        {
+            status = Moving;
+            if(attackTimer->isActive())
+                attackTimer->stop();
 
-        //Update position
-        double tmp = sqrt((nextCell->x() - this->x())*(nextCell->x() - this->x()) + (nextCell->y() - this->y())*(nextCell->y() - this->y()));
-        int deltaX=round((nextCell->x() - this->x())/ tmp * speed);
-        int deltaY=round((nextCell->y() - this->y()) / tmp * speed);
-        this->setGeometry(this->x()+deltaX, this->y()+deltaY, this->width(), this->height());
+            //Update position
+            double tmp = sqrt((nextCell->x() - this->x())*(nextCell->x() - this->x()) + (nextCell->y() - this->y())*(nextCell->y() - this->y()));
+            int deltaX=round((nextCell->x() - this->x())/ tmp * speed);
+            int deltaY=round((nextCell->y() - this->y()) / tmp * speed);
+            this->setGeometry(this->x()+deltaX, this->y()+deltaY, this->width(), this->height());
+        }
     }
 
+    //Update Status
     DrawHealthLine();
 }
 

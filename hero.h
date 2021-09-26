@@ -14,7 +14,7 @@ public:
          int maxHealth, int attack, double attackInterval, QString name, int range, int cost);
     Cell* GetPositionCell(){return posCell;}
 
-    bool CanHoldEnemy(){return curHealth > 0 && capacity > 0;}
+    bool CanHoldEnemy(){return IsAlive() && capacity > 0;}
     void AddEnemy(Enemy* enemy);
     bool RemoveEnemy(Enemy* enemy);
 

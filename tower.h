@@ -38,7 +38,7 @@ public:
     void Upgrade(); //升级
     inline Cell* GetPositionCell(){return posCell;}
     inline int Level(){return level;}
-    inline int Type(){return 0;}
+    virtual int Type() {return 0;}
 
     void mousePressEvent(QMouseEvent *ev) override;
 
@@ -54,14 +54,14 @@ class ArrowTower : public Tower     //箭塔
 {
 public:
     ArrowTower(QWidget* parent, Cell* posCell);
-    inline int Type(){return 1;}
+    int Type() override{return 1;}
 };
 
 class MissleTower : public Tower    //炮塔
 {
 public:
     MissleTower(QWidget* parent, Cell* posCell);
-    inline int Type(){return 2;}
+    int Type()override{return 2;}
 };
 
 
