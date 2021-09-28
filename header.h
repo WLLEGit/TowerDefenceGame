@@ -21,6 +21,8 @@
 #include<QPainter>
 #include<QPaintEvent>
 #include<QProgressBar>
+#include<QtGlobal>
+#include<QTime>
 
 #define DISTANCE(x,y) (sqrt((x)*(x)+(y)*(y)))
 

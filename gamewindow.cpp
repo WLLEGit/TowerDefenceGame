@@ -5,7 +5,6 @@
 
 /*TODO:
  * BUG：怪物移动有时候会超出道路
- * 加点植被装饰
  */
 
 GameWindow::GameWindow(QWidget *parent, int mapID, int roundID) :
@@ -202,12 +201,24 @@ void GameWindow::SetCellRsrcImg(int r, int c)
             bool ri=HelperIsBlocked(r, c+1);
             path = QString(":/assets/map/%1%2%3%4.png").arg(u).arg(d).arg(l).arg(ri);
         }
+        cells[r][c]->setPixmap(QPixmap(path));
     }
     else if(cellType == Cell::Blocked)
     {
         path = ":/assets/map/block.png";
+        QPixmap pix;
+        //随机设置一些装饰
+        if(qrand() % 10 == 0)
+        {
+            QMatrix mat;
+            mat.rotate(qrand() % 360);
+            pix = QPixmap::fromImage(MergeImage(QImage(path), \
+                                                QImage(QString(":/assets/map/decoration%1.png").arg(qrand() % 8)).transformed(mat)));
+        }
+        else
+            pix = QPixmap(path);
+        cells[r][c]->setPixmap(pix);
     }
-    cells[r][c]->setPixmap(QPixmap(path));
 
     if(cellType == Cell::Placable)
     {
