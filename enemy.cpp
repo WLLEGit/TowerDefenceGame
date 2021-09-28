@@ -42,6 +42,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
         enemy->curIndex = 0;
         enemy->path = gameWindow->FindPath(bornCell);
         enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
+        enemy->picHeight = CELLWIDTH/2;
         enemy->SwithPic();
         enemy->picTimer->start(400);
     }
@@ -56,6 +57,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
         enemy->curIndex = 0;
         enemy->path = gameWindow->FindPath(bornCell);
         enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
+        enemy->picHeight = CELLWIDTH * 0.8;
         enemy->SwithPic();
         enemy->picTimer->start(400);
     }
@@ -70,6 +72,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
         enemy->curIndex = 0;
         enemy->path = gameWindow->FindPath(bornCell);
         enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
+        enemy->picHeight = CELLWIDTH;
         enemy->SwithPic();
         enemy->picTimer->start(400);
         enemy->attackTimer->setInterval(1000);
@@ -127,9 +130,11 @@ void Enemy::Update(GameWindow *gameWindow)
                 attackTimer->stop();
 
             //Update position
-            double tmp = sqrt((nextCell->x() - this->x())*(nextCell->x() - this->x()) + (nextCell->y() - this->y())*(nextCell->y() - this->y()));
-            int deltaX=round((nextCell->x() - this->x())/ tmp * speed);
-            int deltaY=round((nextCell->y() - this->y()) / tmp * speed);
+            double dx = (nextCell->x() + nextCell->width() / 2 - this->x() - this->width() / 2);
+            double dy = (nextCell->y() + nextCell->height() / 2 - this->y() - this->height() / 2);
+            double dis = DISTANCE(dx, dy);
+            int deltaX=round(dx / dis * speed);
+            int deltaY=round(dy / dis * speed);
             this->setGeometry(this->x()+deltaX, this->y()+deltaY, this->width(), this->height());
         }
     }
@@ -152,7 +157,7 @@ void Enemy::SwithPic()
 {
     curIndex = (curIndex + 1) % (maxIndex);
     QPixmap pix(QString(":/assets/monsters/%1%2.png").arg(enemyName).arg(curIndex + ((*path)[posIndex+1]->col()-(*path)[posIndex]->col() > 0 ? maxIndex : 0)));
-    pix = pix.scaledToHeight(CELLWIDTH*0.8);
+    pix = pix.scaledToHeight(picHeight);
     this->resize(pix.width(), pix.height());
     this->setPixmap(pix);
 }

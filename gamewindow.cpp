@@ -4,11 +4,11 @@
 #include<iostream>
 
 /*TODO:
- * 完成怪物生成机制5
  * BUG：怪物移动有时候会超出道路
+ * 加点植被装饰
  */
 
-GameWindow::GameWindow(QWidget *parent, int mapID) :
+GameWindow::GameWindow(QWidget *parent, int mapID, int roundID) :
     QMainWindow(parent),
     ui(new Ui::GameWindow)
 {
@@ -21,6 +21,8 @@ GameWindow::GameWindow(QWidget *parent, int mapID) :
     //init map
     LoadMap(mapID);
     InitMapLabels();
+
+    LoadRoundInfo(roundID);
 
     setFixedHeight(CELLWIDTH*row);
 
@@ -42,7 +44,7 @@ GameWindow::GameWindow(QWidget *parent, int mapID) :
     connect(resourceTimer, &QTimer::timeout, this, &GameWindow::UpdateResource);
 
     enemyTimer = new QTimer(this);
-    connect(enemyTimer, &QTimer::timeout, this, [=](){CreateEnemy(1, cells[1][11]);});
+    connect(enemyTimer, &QTimer::timeout, this, &GameWindow::NextEnemy);
     enemyTimer->start(2000);
 
     RunMainloop();
@@ -55,7 +57,7 @@ GameWindow::~GameWindow()
 
 void GameWindow::LoadMap(int id)
 {
-    QString path = QString("D:\\HomeWork\\GaoCheng\\Project\\Code\\TowerDefence\\assets\\MapConfig\\GameMap%1").arg(id);
+    QString path = QString(PROJECTPATH + "assets\\MapConfig\\GameMap%1").arg(id);
     QFile fin(path);
     fin.open(QIODevice::ReadOnly);
     QTextStream in(&fin);
@@ -110,6 +112,7 @@ void GameWindow::LoadMapHelper(QTextStream &in, QString newPathType, Cell::CellT
                 path = new QList<Cell*>();
                 pathMap[QPair<Cell*, Cell::CellType>(start, cellType)] = path;
                 pathMap[QPair<Cell*, Cell::CellType>(start, Cell::Path)] = path;
+                startCellMap[cellType] = start;
             }
             else if(i == n-1)
                 cells[r][c]->AddType(Cell::End);
@@ -121,6 +124,64 @@ void GameWindow::LoadMapHelper(QTextStream &in, QString newPathType, Cell::CellT
     }
     path->push_back(path->last());
 }
+
+void GameWindow::LoadRoundInfo(int id)
+{
+    QString path = QString(PROJECTPATH + "assets\\RoundConfig\\RoundConfig%1").arg(id);
+    QFile fin(path);
+    fin.open(QIODevice::ReadOnly);
+    QTextStream in(&fin);
+
+    round = 0;
+    in >> maxRound;
+    roundinfo.resize(maxRound);
+
+    LoadRoundHelper(in, "Red", Cell::Red);
+    LoadRoundHelper(in, "Green", Cell::Green);
+    LoadRoundHelper(in, "Blue", Cell::Blue);
+    LoadRoundHelper(in, "White", Cell::White);
+}
+
+void GameWindow::LoadRoundHelper(QTextStream &in, QString tarType, Cell::CellType cellType)
+{
+    QString pathType;
+    int cnt;
+
+    int r, type, quantity, interval;
+
+    in >> pathType >> cnt;
+    assert(pathType == tarType);
+    for(int i = 0; i < cnt; ++i)
+    {
+        in >> r >> type >> quantity >> interval;
+        roundinfo[r].roundInfo[cellType].push_back(EnemyConfig(type, quantity, interval));
+    }
+}
+
+void GameWindow::NextEnemy()
+{
+    enemiesGenerateDone = true;
+    enemiesGenerateDone |= NextEnemyHelper(Cell::Red);
+    enemiesGenerateDone |= NextEnemyHelper(Cell::Green);
+    enemiesGenerateDone |= NextEnemyHelper(Cell::Blue);
+    enemiesGenerateDone |= NextEnemyHelper(Cell::White);
+}
+
+bool GameWindow::NextEnemyHelper(Cell::CellType cellType)
+{
+    bool isGenerateDone = true;
+    for(auto& enemyConfig : roundinfo[round].roundInfo[cellType])
+    {
+        if(enemyConfig.quantity)
+        {
+            isGenerateDone = false;
+            CreateEnemy(enemyConfig.type, startCellMap[cellType]);
+            enemyConfig.quantity--;
+        }
+    }
+    return isGenerateDone;
+}
+
 
 void GameWindow::SetCellRsrcImg(int r, int c)
 {
@@ -270,7 +331,7 @@ void GameWindow::UpdateOneFrame()
     if(health <= 0)
     {
         gameStatus = Paused;
-        ui->label->setText("GameEnd");
+        ui->label->setText("Fail");
         ui->label->setStyleSheet("color:red;");
     }
 
@@ -286,6 +347,24 @@ void GameWindow::UpdateOneFrame()
     for(auto& bullet : bullets)
         bullet->Update(this);
 
+    if(enemiesGenerateDone)
+    {
+        bool isRoundEnd=true;
+        for(auto& enemy : enemies)
+            if(enemy->IsAlive())
+                isRoundEnd = false;
+        if(isRoundEnd)
+        {
+            enemiesGenerateDone = false;
+            round++;
+        }
+        if(round == maxRound)
+        {
+            gameStatus = Paused;
+            ui->label->setText("Win");
+            ui->label->setStyleSheet("color:green;");
+        }
+    }
 }
 
 bool GameWindow::OnHeroDead(Hero *hero)
@@ -401,7 +480,7 @@ Enemy *GameWindow::CreateEnemy(int type, Cell *cell)
 void GameWindow::UpdateResource()
 {
     money += 10;
-    ui->resourceLabel->setText(QString("生命值: %1\n资源: %2").arg(health).arg(money));
+    ui->resourceLabel->setText(QString("生命值: %1\n资源: %2\n回合：%3\n").arg(health).arg(money).arg(round));
 }
 
 
@@ -413,3 +492,17 @@ Cell *GameWindow::GetAt(int r, int c)
         return cells[r][c];
 }
 
+
+EnemyConfig::EnemyConfig(int type, int quantity, int interval)
+    :type(type), quantity(quantity), bornInterval(interval)
+{
+}
+
+
+Round::Round()
+{
+    roundInfo[Cell::Red] = QVector<EnemyConfig>();
+    roundInfo[Cell::Green] = QVector<EnemyConfig>();
+    roundInfo[Cell::Blue] = QVector<EnemyConfig>();
+    roundInfo[Cell::White] = QVector<EnemyConfig>();
+}

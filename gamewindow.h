@@ -13,6 +13,20 @@ namespace Ui {
 class GameWindow;
 }
 
+struct EnemyConfig
+{
+    int type;
+    int quantity;
+    int bornInterval;
+    EnemyConfig(int type, int quantity, int interval);
+};
+
+struct Round
+{
+    QMap<Cell::CellType, QVector<EnemyConfig>> roundInfo;
+    Round();
+};
+
 class GameWindow : public QMainWindow
 {
     Q_OBJECT
@@ -21,7 +35,7 @@ public:
     enum GameStatus{Running, Paused, End};
     GameStatus gameStatus = Paused;
 
-    explicit GameWindow(QWidget *parent = nullptr, int mapID=1);
+    explicit GameWindow(QWidget *parent = nullptr, int mapID=1, int roundID=1);
     ~GameWindow();
 
 private:
@@ -36,6 +50,10 @@ private:
     QList<Bullet*> bullets;
 
     int round;
+    int maxRound;
+    QVector<Round> roundinfo;
+    bool enemiesGenerateDone;
+
     int health;
     int money;
 
@@ -44,6 +62,7 @@ private:
     QTimer* enemyTimer;
 
     QMap<QPair<Cell*, Cell::CellType>, QList<Cell*>*> pathMap;
+    QMap<Cell::CellType, Cell*> startCellMap;
 
     int waitToPlaceType;    //等待放置的单位
     int waitToCost;         //将要消耗的资金
@@ -51,6 +70,10 @@ private:
 private:
     void LoadMap(int id);
     void LoadMapHelper(QTextStream& in, QString pathType, Cell::CellType cellType);
+    void LoadRoundInfo(int id);
+    void LoadRoundHelper(QTextStream& in, QString pathType, Cell::CellType cellType);
+    void NextEnemy();
+    bool NextEnemyHelper(Cell::CellType cellType);
     void SetCellRsrcImg(int r, int c);
     void InitMapLabels();
     inline bool HelperIsBlocked(int r, int c){return 0 <= r && r < row && 0 <= c && c < col \
