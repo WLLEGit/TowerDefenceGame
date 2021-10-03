@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/">
+        <file>assets/monsters/boss0.png</file>
+        <file>assets/monsters/boss1.png</file>
+        <file>assets/monsters/boss2.png</file>
+        <file>assets/monsters/boss3.png</file>
+        <file>assets/monsters/boss4.png</file>
+        <file>assets/monsters/boss5.png</file>
+        <file>assets/monsters/monster0.png</file>
+        <file>assets/monsters/monster1.png</file>
+        <file>assets/monsters/monster2.png</file>
+        <file>assets/monsters/monster3.png</file>
+        <file>assets/monsters/pig0.png</file>
+        <file>assets/monsters/pig1.png</file>
+        <file>assets/monsters/pig2.png</file>
+        <file>assets/monsters/pig3.png</file>
+    </qresource>
+</RCC>
