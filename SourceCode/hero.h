@@ -61,8 +61,11 @@ public:
     QProgressBar* healthBar;
     void DrawHealthLine();
 
+    void mousePressEvent(QMouseEvent *ev) override;
+
 signals:
     void HeroDead(Hero*);
+    void HeroPressed(Hero*);
 };
 
 class Hero1 : public Hero

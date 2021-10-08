@@ -44,6 +44,8 @@ bool Hero::RemoveEnemy(Enemy *enemy)
 
 void Hero::Attack()
 {
+    if(isDestoried)
+        return;
     if(target && target->IsAlive())
     {
         target->BeAttacked(attack);
@@ -67,16 +69,28 @@ void Hero::DrawHealthLine()
     healthBar->update();
 }
 
+void Hero::mousePressEvent(QMouseEvent *ev)
+{
+    emit HeroPressed(this);
+    QLabel::mousePressEvent(ev);
+}
+
 void Hero::Update(GameWindow* gameWindow)
 {
     if(isDestoried)
+    {
+        attackTimer->stop();
+        picTimer->stop();
         return;
+    }
 
     if(curHealth <= 0)
     {
         this->hide();
         healthBar->hide();
         isDestoried = true;
+        attackTimer->stop();
+        picTimer->stop();
         emit HeroDead(this);
     }
     if(!target || !target->IsAlive() || !InRange(target->x(), target->y()))

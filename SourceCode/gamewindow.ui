@@ -117,6 +117,19 @@
      <string/>
     </property>
    </widget>
+   <widget class="QPushButton" name="deleteHeroBtn">
+    <property name="geometry">
+     <rect>
+      <x>1060</x>
+      <y>670</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>删除英雄</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

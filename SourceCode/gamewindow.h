@@ -86,6 +86,7 @@ private:
 
     void OnCellPressed(Cell *);
     void OnTowerPressed(Tower *);
+    void OnHeroPressed(Hero*);
     void OnBulletHitEnemy(Bullet*);
 
     Hero* CreateHero(int type, Cell* cell);

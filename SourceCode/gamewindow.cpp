@@ -30,7 +30,7 @@ GameWindow::GameWindow(QWidget *parent, int mapID, int roundID) :
     connect(ui->hero2, &QPushButton::clicked, this, [=](){UnitSelected(0x12);});
     connect(ui->arrowTower, &QPushButton::clicked, this, [=](){UnitSelected(0x21);});
     connect(ui->missileTower, &QPushButton::clicked, this, [=](){UnitSelected(0x22);});
-
+    connect(ui->deleteHeroBtn, &QPushButton::clicked, this, [=](){UnitSelected(-1);});
 
     //ui main loop
     _fpsTimer = new QTimer(this);
@@ -403,6 +403,13 @@ void GameWindow::UnitSelected(int type)
         _waitToPlaceType = -1;
         _waitToCost = 0;
     }
+    else if(type == -1) //delete hero
+    {
+        UnitSelected(0);
+        ui->label->setText("Delete Hero");
+        _waitToPlaceType = -1;
+        _waitToCost = 0;
+    }
     else if(type & 0x10)    //hero
     {
         UnitSelected(0);
@@ -454,6 +461,15 @@ void GameWindow::OnTowerPressed(Tower* tower)
     }
 }
 
+void GameWindow::OnHeroPressed(Hero *hero)
+{
+    if(_waitToPlaceType == -1)
+    {
+        hero->BeAttacked(1000);
+        UnitSelected(0);
+    }
+}
+
 void GameWindow::OnBulletHitEnemy(Bullet *bullet)
 {
     assert(bullet->GetTarget());
@@ -474,6 +490,7 @@ Hero* GameWindow::CreateHero(int type, Cell* cell)
     hero->Show();
     _heros.push_back(hero);
     connect(hero, &Hero::HeroDead, this, &GameWindow::OnHeroDead);
+    connect(hero, &Hero::HeroPressed, this, &GameWindow::OnHeroPressed);
     return hero;
 }
 
