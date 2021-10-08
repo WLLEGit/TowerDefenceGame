@@ -13,9 +13,9 @@ GameWindow::GameWindow(QWidget *parent, int mapID, int roundID) :
 {
     ui->setupUi(this);
 
-    round = 0;
-    health = 10;
-    money = 500;
+    _round = 0;
+    _health = 10;
+    _money = 500;
 
     //init map
     LoadMap(mapID);
@@ -23,7 +23,7 @@ GameWindow::GameWindow(QWidget *parent, int mapID, int roundID) :
 
     LoadRoundInfo(roundID);
 
-    setFixedHeight(CELLWIDTH*row);
+    setFixedHeight(CELLWIDTH*_row);
 
     ui->label->setAlignment(Qt::AlignCenter);
 
@@ -36,15 +36,15 @@ GameWindow::GameWindow(QWidget *parent, int mapID, int roundID) :
 
 
     //ui main loop
-    fpsTimer = new QTimer(this);
-    connect(fpsTimer, &QTimer::timeout, this, &GameWindow::UpdateOneFrame);
+    _fpsTimer = new QTimer(this);
+    connect(_fpsTimer, &QTimer::timeout, this, &GameWindow::UpdateOneFrame);
 
-    resourceTimer = new QTimer(this);
-    connect(resourceTimer, &QTimer::timeout, this, &GameWindow::UpdateResource);
+    _resourceTimer = new QTimer(this);
+    connect(_resourceTimer, &QTimer::timeout, this, &GameWindow::UpdateResource);
 
-    enemyTimer = new QTimer(this);
-    connect(enemyTimer, &QTimer::timeout, this, &GameWindow::NextEnemy);
-    enemyTimer->start(2000);
+    _enemyTimer = new QTimer(this);
+    connect(_enemyTimer, &QTimer::timeout, this, &GameWindow::NextEnemy);
+    _enemyTimer->start(2000);
 
     RunMainloop();
 }
@@ -61,16 +61,16 @@ void GameWindow::LoadMap(int id)
     fin.open(QIODevice::ReadOnly);
     QTextStream in(&fin);
 
-    in >> row >> col;
-    cells.resize(row);
-    for(int i = 0; i < row; ++i)
+    in >> _row >> _col;
+    _cells.resize(_row);
+    for(int i = 0; i < _row; ++i)
     {
-        cells[i].resize(col);
-        for(int j = 0; j < col; ++j)
+        _cells[i].resize(_col);
+        for(int j = 0; j < _col; ++j)
         {
-            cells[i][j] = new Cell(0, 0, this, i, j);
-            connect(cells[i][j], &Cell::CellPressed, this, &GameWindow::OnCellPressed);
-            cells[i][j]->show();
+            _cells[i][j] = new Cell(0, 0, this, i, j);
+            connect(_cells[i][j], &Cell::CellPressed, this, &GameWindow::OnCellPressed);
+            _cells[i][j]->show();
         }
 
     }
@@ -81,10 +81,10 @@ void GameWindow::LoadMap(int id)
     LoadMapHelper(in, "White", Cell::White);
     LoadMapHelper(in, "Placable", Cell::Placable);
 
-    for(int i = 0; i < row; ++i)
-        for(int j = 0; j < col; ++j)
-            if(cells[i][j]->GetCellTypeID()==0)
-                cells[i][j]->AddType(Cell::Blocked);
+    for(int i = 0; i < _row; ++i)
+        for(int j = 0; j < _col; ++j)
+            if(_cells[i][j]->GetCellTypeID()==0)
+                _cells[i][j]->AddType(Cell::Blocked);
 }
 
 void GameWindow::LoadMapHelper(QTextStream &in, QString newPathType, Cell::CellType cellType)
@@ -100,24 +100,24 @@ void GameWindow::LoadMapHelper(QTextStream &in, QString newPathType, Cell::CellT
         in >> r >> c;
         if(cellType == Cell::Placable)
         {
-            cells[r][c]->AddType(cellType);
+            _cells[r][c]->AddType(cellType);
         }
         else
         {
             if(i == 0)
             {
-                cells[r][c]->AddType(Cell::Start);
-                start = cells[r][c];
+                _cells[r][c]->AddType(Cell::Start);
+                start = _cells[r][c];
                 path = new QList<Cell*>();
-                pathMap[QPair<Cell*, Cell::CellType>(start, cellType)] = path;
-                pathMap[QPair<Cell*, Cell::CellType>(start, Cell::Path)] = path;
-                startCellMap[cellType] = start;
+                _pathMap[QPair<Cell*, Cell::CellType>(start, cellType)] = path;
+                _pathMap[QPair<Cell*, Cell::CellType>(start, Cell::Path)] = path;
+                _startCellMap[cellType] = start;
             }
             else if(i == n-1)
-                cells[r][c]->AddType(Cell::End);
+                _cells[r][c]->AddType(Cell::End);
             else
-                cells[r][c]->AddType(cellType);
-            path->push_back(cells[r][c]);
+                _cells[r][c]->AddType(cellType);
+            path->push_back(_cells[r][c]);
         }
 
     }
@@ -131,9 +131,9 @@ void GameWindow::LoadRoundInfo(int id)
     fin.open(QIODevice::ReadOnly);
     QTextStream in(&fin);
 
-    round = 0;
-    in >> maxRound;
-    roundinfo.resize(maxRound);
+    _round = 0;
+    in >> _maxRound;
+    _roundinfo.resize(_maxRound);
 
     LoadRoundHelper(in, "Red", Cell::Red);
     LoadRoundHelper(in, "Green", Cell::Green);
@@ -153,28 +153,28 @@ void GameWindow::LoadRoundHelper(QTextStream &in, QString tarType, Cell::CellTyp
     for(int i = 0; i < cnt; ++i)
     {
         in >> r >> type >> quantity >> interval;
-        roundinfo[r].roundInfo[cellType].push_back(EnemyConfig(type, quantity, interval));
+        _roundinfo[r].roundInfo[cellType].push_back(EnemyConfig(type, quantity, interval));
     }
 }
 
 void GameWindow::NextEnemy()
 {
-    enemiesGenerateDone = true;
-    enemiesGenerateDone |= NextEnemyHelper(Cell::Red);
-    enemiesGenerateDone |= NextEnemyHelper(Cell::Green);
-    enemiesGenerateDone |= NextEnemyHelper(Cell::Blue);
-    enemiesGenerateDone |= NextEnemyHelper(Cell::White);
+    _enemiesGenerateDone = true;
+    _enemiesGenerateDone |= NextEnemyHelper(Cell::Red);
+    _enemiesGenerateDone |= NextEnemyHelper(Cell::Green);
+    _enemiesGenerateDone |= NextEnemyHelper(Cell::Blue);
+    _enemiesGenerateDone |= NextEnemyHelper(Cell::White);
 }
 
 bool GameWindow::NextEnemyHelper(Cell::CellType cellType)
 {
     bool isGenerateDone = true;
-    for(auto& enemyConfig : roundinfo[round].roundInfo[cellType])
+    for(auto& enemyConfig : _roundinfo[_round].roundInfo[cellType])
     {
         if(enemyConfig.quantity)
         {
             isGenerateDone = false;
-            CreateEnemy(enemyConfig.type, startCellMap[cellType]);
+            CreateEnemy(enemyConfig.type, _startCellMap[cellType]);
             enemyConfig.quantity--;
         }
     }
@@ -184,9 +184,9 @@ bool GameWindow::NextEnemyHelper(Cell::CellType cellType)
 
 void GameWindow::SetCellRsrcImg(int r, int c)
 {
-    assert(0 <= r && r <= row && 0 <= c && c <= col);
+    assert(0 <= r && r <= _row && 0 <= c && c <= _col);
 
-    Cell* cell = cells[r][c];
+    Cell* cell = _cells[r][c];
     Cell::CellType cellType = cell->GetCellType();
     QString path;
     if(cellType == Cell::Path)
@@ -201,7 +201,7 @@ void GameWindow::SetCellRsrcImg(int r, int c)
             bool ri=HelperIsBlocked(r, c+1);
             path = QString(":/assets/map/%1%2%3%4.png").arg(u).arg(d).arg(l).arg(ri);
         }
-        cells[r][c]->setPixmap(QPixmap(path));
+        _cells[r][c]->setPixmap(QPixmap(path));
     }
     else if(cellType == Cell::Blocked)
     {
@@ -217,37 +217,37 @@ void GameWindow::SetCellRsrcImg(int r, int c)
         }
         else
             pix = QPixmap(path);
-        cells[r][c]->setPixmap(pix);
+        _cells[r][c]->setPixmap(pix);
     }
 
     if(cellType == Cell::Placable)
     {
         path = ":/assets/map/block.png";
-        cells[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/towers/Tower.png"))));
+        _cells[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/towers/Tower.png"))));
 
     }
 
     if(cell->GetResourceType())
     {
         if(cell->GetResourceType() == 1)
-            cells[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/map/gold.png"))));
+            _cells[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/map/gold.png"))));
         else if(cell->GetResourceType() == 2)
-            cells[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/map/coppers.png"))));
+            _cells[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/map/coppers.png"))));
     }
 
     if(cell->GetCellTypeID() == Cell::End)
-        cells[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/map/end.png"))));
+        _cells[r][c]->setPixmap(QPixmap::fromImage(MergeImage(QImage(path), QImage(":/assets/map/end.png"))));
 }
 
 void GameWindow::InitMapLabels()
 {
-    for(int i = 0; i < row; ++i)
+    for(int i = 0; i < _row; ++i)
     {
-        for(int j = 0; j < col; ++j)
+        for(int j = 0; j < _col; ++j)
         {
-            cells[i][j]->setGeometry(CELLWIDTH * j, CELLWIDTH*i, CELLWIDTH, CELLWIDTH);
-            cells[i][j]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-            cells[i][j]->setScaledContents(true);
+            _cells[i][j]->setGeometry(CELLWIDTH * j, CELLWIDTH*i, CELLWIDTH, CELLWIDTH);
+            _cells[i][j]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+            _cells[i][j]->setScaledContents(true);
             SetCellRsrcImg(i, j);
         }
     }
@@ -258,21 +258,21 @@ Cell *GameWindow::Locate(QLabel *src)
     //src 与 Cell 需要在同一个父控件中
     int r = (src->y() + CELLWIDTH/2) / CELLWIDTH;
     int c = (src->x() + CELLWIDTH/2) / CELLWIDTH;
-    return cells[r][c];
+    return _cells[r][c];
 }
 
 
 Hero *GameWindow::FindPossibleFriendlyUnit(int r, int c)
 {
-    for(auto& fu : heros)
-        if(fu->GetPositionCell() == cells[r][c] && fu->CanHoldEnemy())
+    for(auto& fu : _heros)
+        if(fu->GetPositionCell() == _cells[r][c] && fu->CanHoldEnemy())
             return fu;
     return nullptr;
 }
 
 void GameWindow::EnemyHit(int damage)
 {
-    health -= damage;
+    _health -= damage;
 }
 
 bool GameWindow::CanCellPlaceHero(Cell * c)
@@ -280,7 +280,7 @@ bool GameWindow::CanCellPlaceHero(Cell * c)
     if(c->GetCellType() != Cell::Path)
         return false;
 
-    for(auto& hero : heros)
+    for(auto& hero : _heros)
         if(hero->GetPositionCell() == c)
             return false;
 
@@ -292,7 +292,7 @@ bool GameWindow::CanCellPlaceTower(Cell *cell)
     if(cell->GetCellType() != Cell::Placable)
         return false;
 
-    for(auto& tower : towers)
+    for(auto& tower : _towers)
         if(tower->GetPositionCell() == cell)
             return false;
 
@@ -304,7 +304,7 @@ bool GameWindow::IsCellHasTower(Cell *cell)
     if(cell->GetCellType() != Cell::Placable)
         return false;
 
-    for(auto& tower : towers)
+    for(auto& tower : _towers)
         if(tower->GetPositionCell() == cell)
             return true;
 
@@ -316,60 +316,60 @@ Bullet* GameWindow::CreateBullet(Enemy *target, Tower *src, int speed, int damag
     Bullet* bullet = new Bullet(this, target, src, speed, damage, pic);
     connect(bullet, &Bullet::HitEnemy, this, &GameWindow::OnBulletHitEnemy);
     bullet->show();
-    bullets.push_back(bullet);
+    _bullets.push_back(bullet);
     return bullet;
 }
 
 
 void GameWindow::RunMainloop()
 {
-    fpsTimer->start(1000/FPS);
+    _fpsTimer->start(1000/FPS);
 }
 
 void GameWindow::UpdateOneFrame()
 {
     if(gameStatus != Running)
     {
-        resourceTimer->stop();
-        enemyTimer->stop();
+        _resourceTimer->stop();
+        _enemyTimer->stop();
         return;
     }
-    if(!resourceTimer->isActive())
+    if(!_resourceTimer->isActive())
     {
-        resourceTimer->start(RESOURCEUPDATEDURATION);
-        enemyTimer->start(2000);
+        _resourceTimer->start(RESOURCEUPDATEDURATION);
+        _enemyTimer->start(2000);
     }
-    if(health <= 0)
+    if(_health <= 0)
     {
         gameStatus = Paused;
         ui->label->setText("Fail");
         ui->label->setStyleSheet("color:red;");
     }
 
-    for(auto& enemy : enemies)
+    for(auto& enemy : _enemies)
         enemy->Update(this);
 
-    for(auto& tower : towers)
+    for(auto& tower : _towers)
         tower->Update(this);
 
-    for(auto& hero : heros)
+    for(auto& hero : _heros)
         hero->Update(this);
 
-    for(auto& bullet : bullets)
+    for(auto& bullet : _bullets)
         bullet->Update(this);
 
-    if(enemiesGenerateDone)
+    if(_enemiesGenerateDone)
     {
         bool isRoundEnd=true;
-        for(auto& enemy : enemies)
+        for(auto& enemy : _enemies)
             if(enemy->IsAlive())
                 isRoundEnd = false;
         if(isRoundEnd)
         {
-            enemiesGenerateDone = false;
-            round++;
+            _enemiesGenerateDone = false;
+            _round++;
         }
-        if(round == maxRound)
+        if(_round == _maxRound)
         {
             gameStatus = Paused;
             ui->label->setText("Win");
@@ -380,7 +380,7 @@ void GameWindow::UpdateOneFrame()
 
 bool GameWindow::OnHeroDead(Hero *hero)
 {
-    return heros.removeOne(hero);
+    return _heros.removeOne(hero);
 }
 
 void GameWindow::UnitSelected(int type)
@@ -388,29 +388,29 @@ void GameWindow::UnitSelected(int type)
     if(type == 0)   //reset
     {
         ui->label->setText("");
-        waitToPlaceType = -1;
-        waitToCost = 0;
+        _waitToPlaceType = -1;
+        _waitToCost = 0;
     }
     else if(type & 0x10)    //hero
     {
         UnitSelected(0);
         int cost = (type == 0x11 ? HERO1COST : (type == 0x12 ? HERO2COST : 10000));
-        if(money >= cost)
+        if(_money >= cost)
         {
             ui->label->setText(QString("Hero%1 Selected").arg(type&0xf));
-            waitToPlaceType = type;
-            waitToCost = cost;
+            _waitToPlaceType = type;
+            _waitToCost = cost;
         }
     }
     else if(type & 0x20)    //tower
     {
         UnitSelected(0);
         int cost = type == 0x21 ? ARROWCOST : (type == 0x22 ? MISSILECOST : 10000);
-        if(money >= cost)
+        if(_money >= cost)
         {
             ui->label->setText(QString("%1Tower Selected").arg(type == 0x21 ? "Arrow" : (type == 0x22 ? "Missile" : "UNKNOWN")));
-            waitToPlaceType = type;
-            waitToCost = cost;
+            _waitToPlaceType = type;
+            _waitToCost = cost;
         }
     }
 }
@@ -418,26 +418,26 @@ void GameWindow::UnitSelected(int type)
 void GameWindow::OnCellPressed(Cell* cell)
 {
     qDebug() << "Cell Pressed" << cell->row() << cell->col();
-    if((waitToPlaceType & 0x10) && CanCellPlaceHero(cell)) //放置英雄
+    if((_waitToPlaceType & 0x10) && CanCellPlaceHero(cell)) //放置英雄
     {
-        CreateHero(waitToPlaceType & 0xf, cell);
-        money -= waitToCost;
+        CreateHero(_waitToPlaceType & 0xf, cell);
+        _money -= _waitToCost;
         UnitSelected(0);
     }
-    else if((waitToPlaceType & 0x20) && CanCellPlaceTower(cell))  //放置塔
+    else if((_waitToPlaceType & 0x20) && CanCellPlaceTower(cell))  //放置塔
     {
-        CreateTower(waitToPlaceType & 0xf, cell);
-        money -= waitToCost;
+        CreateTower(_waitToPlaceType & 0xf, cell);
+        _money -= _waitToCost;
         UnitSelected(0);
     }
 }
 
 void GameWindow::OnTowerPressed(Tower* tower)
 {
-    if((waitToPlaceType & 0x20) && ((waitToPlaceType & 0xf) == tower->Type()) && tower->Level() < TOWERMAXLEVEL)
+    if((_waitToPlaceType & 0x20) && ((_waitToPlaceType & 0xf) == tower->Type()) && tower->Level() < TOWERMAXLEVEL)
     {
         tower->Upgrade();
-        money -= waitToCost;
+        _money -= _waitToCost;
         UnitSelected(0);
     }
 }
@@ -451,7 +451,7 @@ void GameWindow::OnBulletHitEnemy(Bullet *bullet)
         target->BeAttacked(bullet->GetDamage());
     }
     bullet->hide();
-    bullets.removeOne(bullet);
+    _bullets.removeOne(bullet);
     delete bullet;
 }
 
@@ -460,7 +460,7 @@ Hero* GameWindow::CreateHero(int type, Cell* cell)
     qDebug() << "CreatHero" << type << cell->row() << cell->col();
     auto hero = Hero::GenerateHero(this, cell, type);
     hero->Show();
-    heros.push_back(hero);
+    _heros.push_back(hero);
     connect(hero, &Hero::HeroDead, this, &GameWindow::OnHeroDead);
     return hero;
 }
@@ -476,31 +476,31 @@ Tower *GameWindow::CreateTower(int type, Cell *cell)
         t = new ArrowTower(this, cell);
     t->show();
     connect(t, &Tower::TowerPressed, this, &GameWindow::OnTowerPressed);
-    towers.push_back(t);
+    _towers.push_back(t);
     return t;
 }
 
 Enemy *GameWindow::CreateEnemy(int type, Cell *cell)
 {
     Enemy* e = Enemy::GenerateEnemy(type, this, cell, this, 20);
-    enemies.push_back(e);
+    _enemies.push_back(e);
     e->Show();
     return e;
 }
 
 void GameWindow::UpdateResource()
 {
-    money += 10;
-    ui->resourceLabel->setText(QString("生命值: %1\n资源: %2\n回合：%3\n").arg(health).arg(money).arg(round));
+    _money += 10;
+    ui->resourceLabel->setText(QString("生命值: %1\n资源: %2\n回合：%3\n").arg(_health).arg(_money).arg(_round));
 }
 
 
 Cell *GameWindow::GetAt(int r, int c)
 {
-    if(0 > r && r >= row && 0 > c && c >= col)
+    if(0 > r && r >= _row && 0 > c && c >= _col)
         return nullptr;
     else
-        return cells[r][c];
+        return _cells[r][c];
 }
 
 

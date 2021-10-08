@@ -20,26 +20,26 @@ public:
                     };
 private:
     Ui::Cell *ui;
-    int type;
-    CellType cellType;
-    int resourceType;   //0:none, 1:gold, 2:coppper
-    int r;
-    int c;
+    int _type;
+    CellType _cellType;
+    int _resourceType;   //0:none, 1:gold, 2:coppper
+    int _r;
+    int _c;
 
 
 public:
-    Cell(int type= Blocked, int resourceType = 0, QWidget* parent=nullptr, int r=0, int c=0);
-    inline CellType GetCellType() const {return cellType;}
-    inline int GetCellTypeID()const {return type;}
-    inline int GetResourceType() const {return resourceType;}
-    inline void AddType(int type){SetType(this->type | type);}
-    inline int row(){return r;}
-    inline int col(){return c;}
+    Cell(int _type= Blocked, int _resourceType = 0, QWidget* parent=nullptr, int _r=0, int _c=0);
+    inline CellType GetCellType() const {return _cellType;}
+    inline int GetCellTypeID()const {return _type;}
+    inline int GetResourceType() const {return _resourceType;}
+    inline void AddType(int type){SetType(this->_type | type);}
+    inline int row(){return _r;}
+    inline int col(){return _c;}
 
     void mousePressEvent(QMouseEvent *ev) override;
 
 private:
-    void SetType(int type);
+    void SetType(int _type);
 
 signals:
     void CellPressed(Cell*);

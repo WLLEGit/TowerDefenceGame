@@ -10,40 +10,39 @@ class Tower : public QLabel     //塔
 {
     Q_OBJECT
 protected:
-    int cost;
-    int level;
-    int range;
-    double attack;
-    double attackInterval;
-    Enemy* target=nullptr;
-    Cell* posCell;
-    QString towerPicPrefix;
-    QString bulletPicPath;
-    QPixmap towerpic;
-    int rotation;
-    int bulletSpeed;
-    int bulletLength;   //子弹长度
+    int _cost;
+    int _level;
+    int _range;
+    double _attack;
+    double _attackInterval;
+    Enemy* _target=nullptr;
+    Cell* _posCell;
+    QString _towerPicPrefix;
+    QString _bulletPicPath;
+    QPixmap _towerpic;
+    int _bulletSpeed;
+    int _bulletLength;   //子弹长度
 
-    QTimer attackTimer;
+    QTimer _attackTimer;
 
-    bool toAttack;
+    bool _toAttack;
 
 protected:
     inline bool InRange(int x, int y);
     void Attack(GameWindow* gameWindow);
 
 public:
-    Tower(QWidget* parent=nullptr, int cost=0, int level=0, int range=0, double attack=0, double attackInterval=0, Cell* posCell=nullptr);
+    Tower(QWidget* parent=nullptr, int _cost=0, int _level=0, int _range=0, double _attack=0, double _attackInterval=0, Cell* _posCell=nullptr);
     void Update(GameWindow* gameWindow);
     void Upgrade(); //升级
-    inline Cell* GetPositionCell(){return posCell;}
-    inline int Level(){return level;}
+    inline Cell* GetPositionCell(){return _posCell;}
+    inline int Level(){return _level;}
     virtual int Type() {return 0;}
 
     void mousePressEvent(QMouseEvent *ev) override;
 
 
-    int Cost(){return cost;}
+    int Cost(){return _cost;}
 
 signals:
     void TowerPressed(Tower*);
@@ -53,14 +52,14 @@ signals:
 class ArrowTower : public Tower     //箭塔
 {
 public:
-    ArrowTower(QWidget* parent, Cell* posCell);
+    ArrowTower(QWidget* parent, Cell* _posCell);
     int Type() override{return 1;}
 };
 
 class MissleTower : public Tower    //炮塔
 {
 public:
-    MissleTower(QWidget* parent, Cell* posCell);
+    MissleTower(QWidget* parent, Cell* _posCell);
     int Type()override{return 2;}
 };
 
@@ -69,19 +68,19 @@ class Bullet : public QLabel        //子弹
 {
     Q_OBJECT
 private:
-    Enemy* target;
-    Tower* sender;
-    int speed;
-    int damage;
-    QPixmap pic;
+    Enemy* _target;
+    Tower* _sender;
+    int _speed;
+    int _damage;
+    QPixmap _pic;
 
-    bool isHit;
+    bool _isHit;
 
 public:
-    Bullet(QWidget* parent, Enemy* target, Tower* sender, int speed, int damage, QPixmap pic);
+    Bullet(QWidget* parent, Enemy* _target, Tower* _sender, int _speed, int _damage, QPixmap _pic);
     void Update(GameWindow* gameWindow);
-    int GetDamage(){return damage;}
-    Enemy* GetTarget(){return target;}
+    int GetDamage(){return _damage;}
+    Enemy* GetTarget(){return _target;}
 
 signals:
     void HitEnemy(Bullet*);

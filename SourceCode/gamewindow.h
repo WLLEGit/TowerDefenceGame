@@ -42,30 +42,30 @@ private:
     Ui::GameWindow *ui;
 
 private:
-    int row, col;
-    QVector<QVector<Cell*>> cells;
-    QList<Enemy*> enemies;
-    QList<Tower*> towers;
-    QList<Hero*> heros;
-    QList<Bullet*> bullets;
+    int _row, _col;
+    QVector<QVector<Cell*>> _cells;
+    QList<Enemy*> _enemies;
+    QList<Tower*> _towers;
+    QList<Hero*> _heros;
+    QList<Bullet*> _bullets;
 
-    int round;
-    int maxRound;
-    QVector<Round> roundinfo;
-    bool enemiesGenerateDone;
+    int _round;
+    int _maxRound;
+    QVector<Round> _roundinfo;
+    bool _enemiesGenerateDone;
 
-    int health;
-    int money;
+    int _health;
+    int _money;
 
-    QTimer* fpsTimer;
-    QTimer* resourceTimer;
-    QTimer* enemyTimer;
+    QTimer* _fpsTimer;
+    QTimer* _resourceTimer;
+    QTimer* _enemyTimer;
 
-    QMap<QPair<Cell*, Cell::CellType>, QList<Cell*>*> pathMap;
-    QMap<Cell::CellType, Cell*> startCellMap;
+    QMap<QPair<Cell*, Cell::CellType>, QList<Cell*>*> _pathMap;
+    QMap<Cell::CellType, Cell*> _startCellMap;
 
-    int waitToPlaceType;    //等待放置的单位
-    int waitToCost;         //将要消耗的资金
+    int _waitToPlaceType;    //等待放置的单位
+    int _waitToCost;         //将要消耗的资金
 
 private:
     void LoadMap(int id);
@@ -76,8 +76,8 @@ private:
     bool NextEnemyHelper(Cell::CellType cellType);
     void SetCellRsrcImg(int r, int c);
     void InitMapLabels();
-    inline bool HelperIsBlocked(int r, int c){return 0 <= r && r < row && 0 <= c && c < col \
-                && (cells[r][c]->GetCellType() == Cell::Blocked || cells[r][c]->GetCellType() == Cell::Placable);}
+    inline bool HelperIsBlocked(int r, int c){return 0 <= r && r < _row && 0 <= c && c < _col \
+                && (_cells[r][c]->GetCellType() == Cell::Blocked || _cells[r][c]->GetCellType() == Cell::Placable);}
     void RunMainloop();     //不断更新塔、敌人、友军的状态
     void UpdateOneFrame();
     bool OnHeroDead(Hero* hero);
@@ -98,7 +98,7 @@ public:
     void OnPlacableClicked(int r, int c);
     inline Cell* GetAt(int r, int c);
     Cell* Locate(QLabel* src);
-    QList<Cell*>* FindPath(Cell* start) {return pathMap[QPair<Cell*, Cell::CellType>(start, Cell::Path)];}
+    QList<Cell*>* FindPath(Cell* start) {return _pathMap[QPair<Cell*, Cell::CellType>(start, Cell::Path)];}
     Hero* FindPossibleFriendlyUnit(int r, int c);
     void EnemyHit(int damage);
 

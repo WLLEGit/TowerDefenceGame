@@ -2,7 +2,7 @@
 #include "ui_cell.h"
 
 Cell::Cell(int type, int resourceType, QWidget* parent, int r, int c)
-    :QLabel(parent), ui(new Ui::Cell), resourceType(resourceType), r(r), c(c)
+    :QLabel(parent), ui(new Ui::Cell), _resourceType(resourceType), _r(r), _c(c)
 {
     SetType(type);
 }
@@ -15,11 +15,11 @@ void Cell::mousePressEvent(QMouseEvent *ev)
 
 void Cell::SetType(int type)
 {
-    this->type = type;
+    this->_type = type;
     if(type & Path)
-        cellType = Path;
+        _cellType = Path;
     else if(type & Blocked)
-        cellType = Blocked;
+        _cellType = Blocked;
     else if(type & Placable)
-        cellType = Placable;
+        _cellType = Placable;
 }

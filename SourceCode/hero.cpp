@@ -82,7 +82,7 @@ void Hero::Update(GameWindow* gameWindow)
     if(!target || !target->IsAlive() || !InRange(target->x(), target->y()))
     {
         target = nullptr;
-        for(auto& enemy : gameWindow->enemies)
+        for(auto& enemy : gameWindow->_enemies)
             if(InRange(enemy->x(), enemy->y()) && enemy->IsAlive())
             {
                 target = enemy;

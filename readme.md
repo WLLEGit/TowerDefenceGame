@@ -60,7 +60,7 @@ enum CellType {Path=0x10, Red=0x11, Green=0x12, Blue=0x14, White=0x18,  //可移
 
 #### 关于怪物移动
 
-Moving状态下啊，怪物会向着路径的下一格中心移动，具体到代码实现上，舍弃了QPropertyAnimation的思路，而是采用每次Update函数调用时，用速度乘以时间算出距离，乘上对应的sin,cos值算出xy偏移量的方法更新位置。
+Moving状态下，怪物会向着路径的下一格中心移动，具体到代码实现上，舍弃了QPropertyAnimation的思路，而是采用每次Update函数调用时，用速度乘以时间算出距离，乘上对应的sin,cos值算出xy偏移量的方法更新位置。
 
 由于游戏30帧的特性，虽然每帧移动是间断的，但在用户看来仍然是连续的，不会出现跳跃的现象。
 
