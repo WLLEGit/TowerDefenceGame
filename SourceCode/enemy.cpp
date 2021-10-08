@@ -131,10 +131,16 @@ void Enemy::Update(GameWindow *gameWindow)
 
             //Update position
             double dx = (nextCell->x() + nextCell->width() / 2 - this->x() - this->width() / 2);
-            double dy = (nextCell->y() + nextCell->height() / 2 - this->y() - this->height() / 2);
+            double dy = (nextCell->y() + nextCell->height() / 2 - this->y() - this->height() * 0.7);
             double dis = DISTANCE(dx, dy);
+
             int deltaX=round(dx / dis * _speed);
             int deltaY=round(dy / dis * _speed);
+            if(!deltaX && abs(dx) > CELLWIDTH * 0.1)
+                deltaX = SIGN(dx);
+            if(!deltaY && abs(dy) > CELLWIDTH * 0.1)
+                deltaY = SIGN(dy);
+
             this->setGeometry(this->x()+deltaX, this->y()+deltaY, this->width(), this->height());
         }
     }

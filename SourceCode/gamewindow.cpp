@@ -3,11 +3,6 @@
 
 #include<iostream>
 
-/*TODO:
- * BUG：怪物移动有时候会超出道路
- */
-
-
 GameWindow::GameWindow(QWidget *parent, int mapID, int roundID) :
     QMainWindow(parent),
     ui(new Ui::GameWindow)
@@ -17,6 +12,7 @@ GameWindow::GameWindow(QWidget *parent, int mapID, int roundID) :
     _round = 0;
     _health = 10;
     _money = 500;
+    _enemiesGenerateDone = false;
 
     //init map
     LoadMap(mapID);
@@ -163,7 +159,7 @@ void GameWindow::LoadRoundHelper(QTextStream &in, QString tarType, Cell::CellTyp
 
 void GameWindow::NextEnemy()
 {
-    _enemiesGenerateDone = true;
+    _enemiesGenerateDone = false;
     _enemiesGenerateDone |= NextEnemyHelper(Cell::Red);
     _enemiesGenerateDone |= NextEnemyHelper(Cell::Green);
     _enemiesGenerateDone |= NextEnemyHelper(Cell::Blue);

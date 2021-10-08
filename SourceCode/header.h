@@ -25,6 +25,7 @@
 #include<QTime>
 
 #define DISTANCE(x,y) (sqrt((x)*(x)+(y)*(y)))
+#define SIGN(x) (x == 0 ? 0 : (x < 0 ? -1 : 1))
 
 constexpr int CELLWIDTH = 70;   //单元格像素大小
 constexpr int FPS = 30;         //帧率
