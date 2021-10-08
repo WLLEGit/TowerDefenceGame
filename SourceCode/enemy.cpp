@@ -33,7 +33,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
     Enemy* enemy;
     if(type == 0)   //pig
     {
-        enemy = new Enemy(parent, 15, 5, 1, 0.8, 1.1, 1, CELLWIDTH/FPS, 1);
+        enemy = new Enemy(parent, 15, 5, 1, 0.8, 1.1, 1, (double)CELLWIDTH/FPS, 1);
         connect(enemy->_picTimer, &QTimer::timeout, enemy, &Enemy::SwithPic);
         connect(enemy->_attackTimer, &QTimer::timeout, enemy, &Enemy::Attack);
         enemy->_pathType = cellType;
@@ -48,7 +48,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
     }
     else if(type == 1)  //Monster
     {
-        enemy = new Enemy(parent, 30, 8, 2, 1.2, 0.8, 1, CELLWIDTH/2/FPS, 2);
+        enemy = new Enemy(parent, 30, 8, 2, 1.2, 0.8, 1, (double)CELLWIDTH/2/FPS, 2);
         connect(enemy->_picTimer, &QTimer::timeout, enemy, &Enemy::SwithPic);
         connect(enemy->_attackTimer, &QTimer::timeout, enemy, &Enemy::Attack);
         enemy->_pathType = cellType;
@@ -63,7 +63,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
     }
     else if(type == 2)  //Boss
     {
-        enemy = new Enemy(parent, 1000, 20, 5, 1, 1, 1.8, (float)CELLWIDTH/3/FPS, 1);
+        enemy = new Enemy(parent, 1000, 20, 5, 1, 1, 1.8, (double)CELLWIDTH/3/FPS, 1);
         connect(enemy->_picTimer, &QTimer::timeout, enemy, &Enemy::SwithPic);
         connect(enemy->_attackTimer, &QTimer::timeout, enemy, &Enemy::Attack);
         enemy->_pathType = cellType;
