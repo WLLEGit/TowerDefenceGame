@@ -18,7 +18,8 @@ struct EnemyConfig
     int type;
     int quantity;
     int bornInterval;
-    EnemyConfig(int type, int quantity, int interval);
+    Cell::CellType bornCellType;
+    EnemyConfig(int type, int quantity, int interval, Cell::CellType bornCellType = Cell::Path);
 };
 
 struct Round
@@ -89,7 +90,7 @@ private:
 
     Hero* CreateHero(int type, Cell* cell);
     Tower* CreateTower(int type, Cell* cell);
-    Enemy* CreateEnemy(int type, Cell* cell);
+    Enemy* CreateEnemy(int type, Cell* cell, Cell::CellType cellType);
 
     void UpdateResource();
 
@@ -98,7 +99,7 @@ public:
     void OnPlacableClicked(int r, int c);
     inline Cell* GetAt(int r, int c);
     Cell* Locate(QLabel* src);
-    QList<Cell*>* FindPath(Cell* start) {return _pathMap[QPair<Cell*, Cell::CellType>(start, Cell::Path)];}
+    QList<Cell*>* FindPath(Cell* start, Cell::CellType cellType=Cell::Path);
     Hero* FindPossibleFriendlyUnit(int r, int c);
     void EnemyHit(int damage);
 

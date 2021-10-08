@@ -153,7 +153,7 @@ void GameWindow::LoadRoundHelper(QTextStream &in, QString tarType, Cell::CellTyp
     for(int i = 0; i < cnt; ++i)
     {
         in >> r >> type >> quantity >> interval;
-        _roundinfo[r].roundInfo[cellType].push_back(EnemyConfig(type, quantity, interval));
+        _roundinfo[r].roundInfo[cellType].push_back(EnemyConfig(type, quantity, interval, cellType));
     }
 }
 
@@ -174,7 +174,7 @@ bool GameWindow::NextEnemyHelper(Cell::CellType cellType)
         if(enemyConfig.quantity)
         {
             isGenerateDone = false;
-            CreateEnemy(enemyConfig.type, _startCellMap[cellType]);
+            CreateEnemy(enemyConfig.type, _startCellMap[cellType], cellType);
             enemyConfig.quantity--;
         }
     }
@@ -259,6 +259,18 @@ Cell *GameWindow::Locate(QLabel *src)
     int r = (src->y() + CELLWIDTH/2) / CELLWIDTH;
     int c = (src->x() + CELLWIDTH/2) / CELLWIDTH;
     return _cells[r][c];
+}
+
+QList<Cell *> *GameWindow::FindPath(Cell *start, Cell::CellType cellType)
+{
+    if(!(start->GetCellTypeID() & Cell::Start))
+        throw "Cell doesn't marked Cell::Start";
+
+    auto target = QPair<Cell*, Cell::CellType>(start, cellType);
+    if(_pathMap.find(target) != _pathMap.end())
+        return _pathMap[QPair<Cell*, Cell::CellType>(start, cellType)];
+    else
+        return _pathMap[QPair<Cell*, Cell::CellType>(start, Cell::Path)];
 }
 
 
@@ -480,9 +492,9 @@ Tower *GameWindow::CreateTower(int type, Cell *cell)
     return t;
 }
 
-Enemy *GameWindow::CreateEnemy(int type, Cell *cell)
+Enemy *GameWindow::CreateEnemy(int type, Cell *cell, Cell::CellType cellType)
 {
-    Enemy* e = Enemy::GenerateEnemy(type, this, cell, this, 20);
+    Enemy* e = Enemy::GenerateEnemy(type, this, cell, this, cellType);
     _enemies.push_back(e);
     e->Show();
     return e;
@@ -504,8 +516,8 @@ Cell *GameWindow::GetAt(int r, int c)
 }
 
 
-EnemyConfig::EnemyConfig(int type, int quantity, int interval)
-    :type(type), quantity(quantity), bornInterval(interval)
+EnemyConfig::EnemyConfig(int type, int quantity, int interval, Cell::CellType bornCellType)
+    :type(type), quantity(quantity), bornInterval(interval), bornCellType(bornCellType)
 {
 }
 

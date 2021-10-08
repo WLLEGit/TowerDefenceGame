@@ -14,7 +14,12 @@ MainWindow::MainWindow(QWidget *parent)
         ui->label->setText(tostring[curColor]);
     });
     connect(ui->generateBtn, &QPushButton::clicked, this, [=](){
-        QFile fout("D:\\HomeWork\\GaoCheng\\Project\\Code\\TowerDefence\\assets\\MapConfig\\newMap");
+#ifdef QT_DEBUG
+        QFile fout("D:/HomeWork/GaoCheng/Project/Code/TowerDefence/SourceCode/MapConfig/newMap");
+#else
+        QFile fout("./newMap");
+#endif
+
         fout.open(QIODevice::WriteOnly);
         QTextStream out(&fout);
         out << r << " " << c << endl;
@@ -67,7 +72,7 @@ void MainWindow::configSize()
         {
             map[i][j] = new MyButton(this, i, j);
             map[i][j]->setGeometry(j*CELLWIDTH, i*CELLWIDTH, CELLWIDTH, CELLWIDTH);
-            map[i][j]->setText(QString("(%1, %2)").arg(i).arg(2));
+            map[i][j]->setText(QString("(%1, %2)").arg(i).arg(j));
             map[i][j]->setStyleSheet("background-color:Gray");
             map[i][j]->show();
             connect(map[i][j], &MyButton::mouseClicked, this, &MainWindow::OnBtnClicked);

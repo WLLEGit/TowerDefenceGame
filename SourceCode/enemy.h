@@ -31,7 +31,7 @@ private:
     QList<Cell*>* _path;
     int _posIndex=0;
     double _speed;
-    int _pathType;
+    Cell::CellType _pathType;
 
     enum EnemyStatus {Moving, Fighting, Dead};
     EnemyStatus _status=Moving;
@@ -45,7 +45,7 @@ public:
     Enemy(QWidget* parent=nullptr, double health=0, double _attack=0, int _dealHealthDamage=0, double _rangedDamageRate=0, \
           double _closeDamageRate=0, double _attackInterval=0, double _speed=0, int _attackRange=0);
 
-    static Enemy* GenerateEnemy(int type, QWidget* parent, Cell* bornCell, GameWindow* gameWindow, int _pathType);
+    static Enemy* GenerateEnemy(int type, QWidget* parent, Cell* bornCell, GameWindow* gameWindow, Cell::CellType cellType);
     void Update(GameWindow* gameWindow);  //每帧调用
     inline bool IsAlive(){return _status != Dead;}
     void BeAttacked(int damage){_curHealth -= damage;}

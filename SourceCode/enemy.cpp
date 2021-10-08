@@ -28,7 +28,7 @@ void Enemy::DrawHealthLine()
     _healthBar->update();
 }
 
-Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindow* gameWindow, int pathType)
+Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindow* gameWindow, Cell::CellType cellType)
 {
     Enemy* enemy;
     if(type == 0)   //pig
@@ -36,11 +36,11 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
         enemy = new Enemy(parent, 15, 5, 1, 0.8, 1.1, 1, CELLWIDTH/FPS, 1);
         connect(enemy->_picTimer, &QTimer::timeout, enemy, &Enemy::SwithPic);
         connect(enemy->_attackTimer, &QTimer::timeout, enemy, &Enemy::Attack);
-        enemy->_pathType = pathType;
+        enemy->_pathType = cellType;
         enemy->_enemyName = "pig";
         enemy->_maxIndex = 2;
         enemy->_curIndex = 0;
-        enemy->_path = gameWindow->FindPath(bornCell);
+        enemy->_path = gameWindow->FindPath(bornCell, cellType);
         enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
         enemy->_picHeight = CELLWIDTH/2;
         enemy->SwithPic();
@@ -51,11 +51,11 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
         enemy = new Enemy(parent, 30, 8, 2, 1.2, 0.8, 1, CELLWIDTH/2/FPS, 2);
         connect(enemy->_picTimer, &QTimer::timeout, enemy, &Enemy::SwithPic);
         connect(enemy->_attackTimer, &QTimer::timeout, enemy, &Enemy::Attack);
-        enemy->_pathType = pathType;
+        enemy->_pathType = cellType;
         enemy->_enemyName = "monster";
         enemy->_maxIndex = 2;
         enemy->_curIndex = 0;
-        enemy->_path = gameWindow->FindPath(bornCell);
+        enemy->_path = gameWindow->FindPath(bornCell, cellType);
         enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
         enemy->_picHeight = CELLWIDTH * 0.8;
         enemy->SwithPic();
@@ -66,11 +66,11 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
         enemy = new Enemy(parent, 1000, 20, 5, 1, 1, 1.8, (float)CELLWIDTH/3/FPS, 1);
         connect(enemy->_picTimer, &QTimer::timeout, enemy, &Enemy::SwithPic);
         connect(enemy->_attackTimer, &QTimer::timeout, enemy, &Enemy::Attack);
-        enemy->_pathType = pathType;
+        enemy->_pathType = cellType;
         enemy->_enemyName = "boss";
         enemy->_maxIndex = 3;
         enemy->_curIndex = 0;
-        enemy->_path = gameWindow->FindPath(bornCell);
+        enemy->_path = gameWindow->FindPath(bornCell, cellType);
         enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
         enemy->_picHeight = CELLWIDTH;
         enemy->SwithPic();
@@ -79,7 +79,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
     }
     else
     {
-        return GenerateEnemy(0, parent, bornCell, gameWindow, pathType);
+        return GenerateEnemy(0, parent, bornCell, gameWindow, cellType);
     }
     return enemy;
 }
