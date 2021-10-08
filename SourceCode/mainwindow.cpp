@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     QPushButton* btn = new QPushButton("start", this);
-    gameWindow = new GameWindow(this);
+    gameWindow = new GameWindow(nullptr);
 
     connect(btn, &QPushButton::clicked, this, [=](){this->hide();gameWindow->show(); gameWindow->gameStatus=GameWindow::Running;});
 }
