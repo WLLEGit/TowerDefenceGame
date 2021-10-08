@@ -7,6 +7,7 @@
  * BUG：怪物移动有时候会超出道路
  */
 
+
 GameWindow::GameWindow(QWidget *parent, int mapID, int roundID) :
     QMainWindow(parent),
     ui(new Ui::GameWindow)
@@ -91,10 +92,11 @@ void GameWindow::LoadMapHelper(QTextStream &in, QString newPathType, Cell::CellT
 {
     QString pathType;
     Cell* start;
-    QList<Cell*>* path;
+    QList<Cell*>* path = nullptr;
     int n, r, c;
     in >> pathType >> n;
     assert(pathType == newPathType);
+
     for(int i = 0; i < n; ++i)
     {
         in >> r >> c;
@@ -121,7 +123,9 @@ void GameWindow::LoadMapHelper(QTextStream &in, QString newPathType, Cell::CellT
         }
 
     }
-    path->push_back(path->last());
+
+    if(path)
+        path->push_back(path->last());
 }
 
 void GameWindow::LoadRoundInfo(int id)

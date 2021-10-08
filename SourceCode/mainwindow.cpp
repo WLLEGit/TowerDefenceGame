@@ -9,7 +9,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     QPushButton* btn = new QPushButton("start", this);
     gameWindow = new GameWindow(this);
-    gameWindow->setAttribute(Qt::WA_DeleteOnClose);
 
     connect(btn, &QPushButton::clicked, this, [=](){this->hide();gameWindow->show(); gameWindow->gameStatus=GameWindow::Running;});
 }
