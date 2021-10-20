@@ -1,11 +1,8 @@
 #include "enemy.h"
 #include "gamewindow.h"
 
-Enemy::Enemy(QWidget* parent, double health, double attack, int dealHealthDamage, double rangedDamageRate, \
-             double closeDamageRate, double attackInterval, double speed, int attackRange)
-    :QLabel(parent), _maxHealth(health), _curHealth(health), _attack(attack), _dealHealthDamage(dealHealthDamage),
-      _rangedDamageRate(rangedDamageRate), _closeDamageRate(closeDamageRate), _attackInterval(attackInterval), \
-      _attackRange(attackRange), _speed(speed)
+Enemy::Enemy(QWidget* parent)
+    :QLabel(parent)
 {
     setAttribute(Qt::WA_TransparentForMouseEvents, true);   //对鼠标事件穿透
 
@@ -19,6 +16,9 @@ Enemy::Enemy(QWidget* parent, double health, double attack, int dealHealthDamage
     _healthBar->setTextVisible(false);
     _healthBar->setValue(100);
     DrawHealthLine();
+
+    connect(this->_picTimer, &QTimer::timeout, this, &Enemy::SwithPic);
+    connect(this->_attackTimer, &QTimer::timeout, this, &Enemy::Attack);
 }
 
 void Enemy::DrawHealthLine()
@@ -28,58 +28,41 @@ void Enemy::DrawHealthLine()
     _healthBar->update();
 }
 
+void Enemy::InitConfig(QString enemyName)
+{
+    QJsonObject enemyConfig = globalConfig["Enemies"].toObject()[enemyName].toObject();
+    _maxHealth = enemyConfig["maxHealth"].toInt();
+    _curHealth = _maxHealth;
+    _attack = enemyConfig["attack"].toInt();
+    _dealHealthDamage = enemyConfig["dealHealthDamage"].toInt();
+    _attackInterval = enemyConfig["attackInterval"].toDouble();
+    _attackRange = enemyConfig["attackRangeRate"].toDouble()*CELLWIDTH;
+    _speed = enemyConfig["speedRate"].toDouble()*CELLWIDTH/FPS;
+    _enemyName = enemyConfig["enemyName"].toString();
+    _maxIndex = enemyConfig["maxIndex"].toInt();
+    _curIndex = 0;
+    _picHeight = CELLWIDTH*enemyConfig["picHeightRate"].toDouble();
+    _isMilitant = enemyConfig["isMilitant"].toBool();
+    _isFlying = enemyConfig["isFlying"].toBool();
+}
+
+#define CaseHelper(type, className) \
+    case type:\
+        enemy = new className(parent);\
+        enemy->InitBornLocation(gameWindow, bornCell, cellType);\
+        break;
 Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindow* gameWindow, Cell::CellType cellType)
 {
     Enemy* enemy;
-    if(type == 0)   //pig
-    {
-        enemy = new Enemy(parent, 15, 5, 1, 0.8, 1.1, 1, (double)CELLWIDTH/FPS, 1);
-        connect(enemy->_picTimer, &QTimer::timeout, enemy, &Enemy::SwithPic);
-        connect(enemy->_attackTimer, &QTimer::timeout, enemy, &Enemy::Attack);
-        enemy->_pathType = cellType;
-        enemy->_enemyName = "pig";
-        enemy->_maxIndex = 2;
-        enemy->_curIndex = 0;
-        enemy->_path = gameWindow->FindPath(bornCell, cellType);
-        enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
-        enemy->_picHeight = CELLWIDTH/2;
-        enemy->SwithPic();
-        enemy->_picTimer->start(400);
-    }
-    else if(type == 1)  //Monster
-    {
-        enemy = new Enemy(parent, 30, 8, 2, 1.2, 0.8, 1, (double)CELLWIDTH/2/FPS, 2);
-        connect(enemy->_picTimer, &QTimer::timeout, enemy, &Enemy::SwithPic);
-        connect(enemy->_attackTimer, &QTimer::timeout, enemy, &Enemy::Attack);
-        enemy->_pathType = cellType;
-        enemy->_enemyName = "monster";
-        enemy->_maxIndex = 2;
-        enemy->_curIndex = 0;
-        enemy->_path = gameWindow->FindPath(bornCell, cellType);
-        enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
-        enemy->_picHeight = CELLWIDTH * 0.8;
-        enemy->SwithPic();
-        enemy->_picTimer->start(400);
-    }
-    else if(type == 2)  //Boss
-    {
-        enemy = new Enemy(parent, 1000, 20, 5, 1, 1, 1.8, (double)CELLWIDTH/3/FPS, 1);
-        connect(enemy->_picTimer, &QTimer::timeout, enemy, &Enemy::SwithPic);
-        connect(enemy->_attackTimer, &QTimer::timeout, enemy, &Enemy::Attack);
-        enemy->_pathType = cellType;
-        enemy->_enemyName = "boss";
-        enemy->_maxIndex = 3;
-        enemy->_curIndex = 0;
-        enemy->_path = gameWindow->FindPath(bornCell, cellType);
-        enemy->setGeometry(bornCell->x(), bornCell->y(), 0, 0);
-        enemy->_picHeight = CELLWIDTH;
-        enemy->SwithPic();
-        enemy->_picTimer->start(400);
-        enemy->_attackTimer->setInterval(1000);
-    }
-    else
-    {
-        return GenerateEnemy(0, parent, bornCell, gameWindow, cellType);
+    switch (type) {
+    CaseHelper(0, EnemyFly1)
+    CaseHelper(1, EnemyMonster)
+    CaseHelper(2, EnemyHealer)
+    CaseHelper(3, EnemyAntiTower)
+    CaseHelper(4, EnemyFly1)
+    CaseHelper(5, EnemyFly2)
+    default:
+        enemy = nullptr;
     }
     return enemy;
 }
@@ -94,6 +77,7 @@ void Enemy::Update(GameWindow *gameWindow)
         OnDead();
         return;
     }
+
 
     Cell* posCell = gameWindow->Locate(this);
     if(posCell->GetCellTypeID() == Cell::End)   //检查是否到达终点
@@ -111,9 +95,11 @@ void Enemy::Update(GameWindow *gameWindow)
     }
     Cell* nextCell = (*_path)[_posIndex + 1];
 
-    if(_status != Fighting || !_target || !_target->IsAlive())   //如果在战斗中则不寻找新的状态
+    if(!_isMilitant)
+        _status = Moving;   //畏战敌人无攻击行为
+    else if(_status != Fighting || !_target || !_target->IsAlive())   //如果在战斗中则不寻找新的状态
     {
-        Hero* barrierFU = gameWindow->FindPossibleFriendlyUnit(posCell->row(), posCell->col());
+        Hero* barrierFU = gameWindow->FindOneLivingHeroInRange(this->x(), this->y(), _attackRange);
         if(barrierFU)
         {
             _status = Fighting;
@@ -144,7 +130,8 @@ void Enemy::Update(GameWindow *gameWindow)
             this->setGeometry(this->x()+deltaX, this->y()+deltaY, this->width(), this->height());
         }
     }
-
+    //调用特殊能力
+    //SpecialAbility(gameWindow);
     //Update Status
     DrawHealthLine();
 }
@@ -156,6 +143,15 @@ void Enemy::OnDead()
     _attackTimer->stop();
     if(_target && _target->IsAlive())
         _target->RemoveEnemy(this);
+}
+
+void Enemy::InitBornLocation(GameWindow *gameWindow, Cell *bornCell, Cell::CellType cellType)
+{
+    _pathType = cellType;
+    _path = gameWindow->FindPath(bornCell, cellType);
+    setGeometry(bornCell->x(), bornCell->y(), 0, 0);
+    SwithPic();
+    _picTimer->start(400);
 }
 
 
@@ -170,6 +166,8 @@ void Enemy::SwithPic()
 
 void Enemy::Attack()
 {
+    if(_attack == 0)
+        return;
     if(_target && _target->IsAlive())
     {
         _target->BeAttacked(_attack);
@@ -179,4 +177,34 @@ void Enemy::Attack()
         _target = nullptr;
         _attackTimer->stop();
     }
+}
+
+#define ConstructorCodeHelper(NAME)\
+NAME::NAME(QWidget* parent)\
+    :Enemy(parent)\
+{\
+    InitConfig(QString(#NAME));\
+}
+ConstructorCodeHelper(EnemyFly1)
+ConstructorCodeHelper(EnemyFly2)
+ConstructorCodeHelper(EnemyPig)
+ConstructorCodeHelper(EnemyMonster)
+ConstructorCodeHelper(EnemyAntiTower)
+ConstructorCodeHelper(EnemyHealer)
+
+#define SpecialAbilityCodeHelper(NAME) \
+    void NAME::SpecialAbility(GameWindow*){}
+SpecialAbilityCodeHelper(EnemyFly1)
+SpecialAbilityCodeHelper(EnemyFly2)
+SpecialAbilityCodeHelper(EnemyPig)
+SpecialAbilityCodeHelper(EnemyMonster)
+SpecialAbilityCodeHelper(EnemyAntiTower)
+
+void EnemyHealer::SpecialAbility(GameWindow* gameWindow)
+{
+    //治愈范围内所有敌方单位
+    auto targets = gameWindow->FindAllEnemiesInRange(this->x(), this->y(), _attackRange);
+    for(auto& tar : targets)
+        if(tar->IsAlive())
+            tar->BeAttacked(-5);
 }

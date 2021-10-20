@@ -1,18 +1,22 @@
 <RCC>
     <qresource prefix="/">
-        <file>assets/monsters/boss0.png</file>
-        <file>assets/monsters/boss1.png</file>
-        <file>assets/monsters/boss2.png</file>
-        <file>assets/monsters/boss3.png</file>
-        <file>assets/monsters/boss4.png</file>
-        <file>assets/monsters/boss5.png</file>
-        <file>assets/monsters/monster0.png</file>
-        <file>assets/monsters/monster1.png</file>
-        <file>assets/monsters/monster2.png</file>
-        <file>assets/monsters/monster3.png</file>
-        <file>assets/monsters/pig0.png</file>
-        <file>assets/monsters/pig1.png</file>
-        <file>assets/monsters/pig2.png</file>
-        <file>assets/monsters/pig3.png</file>
+        <file>assets/monsters/EnemyHealer0.png</file>
+        <file>assets/monsters/EnemyHealer1.png</file>
+        <file>assets/monsters/EnemyHealer2.png</file>
+        <file>assets/monsters/EnemyHealer3.png</file>
+        <file>assets/monsters/EnemyHealer4.png</file>
+        <file>assets/monsters/EnemyHealer5.png</file>
+        <file>assets/monsters/EnemyMonster0.png</file>
+        <file>assets/monsters/EnemyMonster1.png</file>
+        <file>assets/monsters/EnemyMonster2.png</file>
+        <file>assets/monsters/EnemyMonster3.png</file>
+        <file>assets/monsters/EnemyPig0.png</file>
+        <file>assets/monsters/EnemyPig1.png</file>
+        <file>assets/monsters/EnemyPig2.png</file>
+        <file>assets/monsters/EnemyPig3.png</file>
+        <file>assets/monsters/EnemyFly10.png</file>
+        <file>assets/monsters/EnemyFly11.png</file>
+        <file>assets/monsters/EnemyFly20.png</file>
+        <file>assets/monsters/EnemyFly21.png</file>
     </qresource>
 </RCC>

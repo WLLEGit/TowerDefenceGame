@@ -101,7 +101,6 @@ public:
     inline Cell* GetAt(int r, int c);
     Cell* Locate(QLabel* src);
     QList<Cell*>* FindPath(Cell* start, Cell::CellType cellType=Cell::Path);
-    Hero* FindPossibleFriendlyUnit(int r, int c);
     void EnemyHit(int damage);
 
     bool CanCellPlaceHero(Cell*); //判断能否放置英雄
@@ -109,6 +108,14 @@ public:
     bool IsCellHasTower(Cell* cell);    //判断是否存在塔
 
     Bullet* CreateBullet(Enemy* target, Tower* src, int speed, int damage, QPixmap pic);
+
+    QVector<Enemy*> FindAllEnemiesInRange(int x, int y, int range);
+    QVector<Hero*> FindAllHerosInRange(int x, int y, int range);
+    QVector<Tower*> FindAllTowersInRange(int x, int y, int range);
+
+    Enemy* FindOneLivingEnemyInRange(int x, int y, int range);
+    Hero* FindOneLivingHeroInRange(int x, int y, int range);
+    Tower* FindOneLivingTowerInRange(int x, int y, int range);
 
 
     friend void Enemy::Update(GameWindow*);

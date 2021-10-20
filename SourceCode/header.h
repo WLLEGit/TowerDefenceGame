@@ -23,6 +23,8 @@
 #include<QProgressBar>
 #include<QtGlobal>
 #include<QTime>
+#include<QJsonObject>
+#include<QJsonParseError>
 
 #define DISTANCE(x,y) (sqrt((x)*(x)+(y)*(y)))
 #define SIGN(x) (x == 0 ? 0 : (x < 0 ? -1 : 1))
@@ -39,7 +41,7 @@ constexpr int TOWERMAXLEVEL = 3;
 constexpr int RESOURCEUPDATEDURATION = 400; //ms
 
 #ifdef QT_DEBUG
-const QString PROJECTPATH = "D:/HomeWork/GaoCheng/Project/Code/TowerDefence/SourceCode/";
+const QString PROJECTPATH = "D:\\HomeWork\\GaoCheng\\Project\\TowerDefence\\SourceCode\\";
 #else
 const QString PROJECTPATH = "./";
 #endif
@@ -49,6 +51,9 @@ enum class Direction{Left, Down, Up, Right, None};
 extern QImage MergeImage(const QImage& baseImage, const QImage& overlayImage);  //合并两张图片
 
 extern QPixmap RotatePixmap(const QPixmap& pixmap, QLabel* target, QLabel* src);    //旋转图片，使向上的图片朝向target
+
+extern QJsonObject globalConfig;
+void ReadConfigFromJsonFile();
 
 
 #endif // HEADER_H

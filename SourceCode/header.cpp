@@ -1,5 +1,7 @@
 #include "header.h"
 
+QJsonObject globalConfig;
+
 QImage MergeImage(const QImage& baseImage, const QImage& overlayImage)  //合并两张图片
 {
     QImage overlay = overlayImage.scaled(baseImage.size());
@@ -27,4 +29,23 @@ QPixmap RotatePixmap(const QPixmap &pixmap, QLabel *target, QLabel *src)
     double Sin= dx/dis, Cos=dy/dis;
     QMatrix mat(Cos, Sin, -Sin, Cos, 0, 0);
     return pixmap.transformed(mat);
+}
+
+void ReadConfigFromJsonFile()
+{
+    QFile file(PROJECTPATH+ "assets/config.json");
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "Config Load Failed";
+        assert(false);
+    }
+    QJsonParseError *error=new QJsonParseError;
+    QJsonDocument jdc=QJsonDocument::fromJson(file.readAll(),error);
+    if(error->error!=QJsonParseError::NoError)
+    {
+        qDebug()<<"parseJson:"<<error->errorString();
+        assert(false);
+    }
+
+    globalConfig = jdc.object();
 }

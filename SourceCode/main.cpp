@@ -6,6 +6,8 @@
 int main(int argc, char *argv[])
 {
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
+    ReadConfigFromJsonFile();
+
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

@@ -13,7 +13,7 @@ class Cell : public QLabel  //单元格类
     Q_OBJECT
 
 public:
-    enum CellType {Path=0x10, Red=0x11, Green=0x12, Blue=0x14, White=0x18,  //可移动路径
+    enum CellType {Path=0x10, Red=0x11, Green=0x12, Blue=0x14, White=0x18,  //可移动路径，White为飞行路径
                    Start=0x3f, End=0x5f,                                    //始末格
                    Blocked=0x100,                                           //阻碍
                    Placable=0x1000                                         //可放置塔

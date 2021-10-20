@@ -44,6 +44,8 @@ public:
 
     int Cost(){return _cost;}
 
+    bool IsAlive() {return true;}
+
 signals:
     void TowerPressed(Tower*);
 

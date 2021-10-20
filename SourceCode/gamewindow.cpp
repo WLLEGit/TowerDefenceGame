@@ -273,15 +273,6 @@ QList<Cell *> *GameWindow::FindPath(Cell *start, Cell::CellType cellType)
         return _pathMap[QPair<Cell*, Cell::CellType>(start, Cell::Path)];
 }
 
-
-Hero *GameWindow::FindPossibleFriendlyUnit(int r, int c)
-{
-    for(auto& fu : _heros)
-        if(fu->GetPositionCell() == _cells[r][c] && fu->CanHoldEnemy())
-            return fu;
-    return nullptr;
-}
-
 void GameWindow::EnemyHit(int damage)
 {
     _health -= damage;
@@ -523,6 +514,34 @@ void GameWindow::UpdateResource()
     ui->resourceLabel->setText(QString("生命值: %1\n资源: %2\n回合：%3\n").arg(_health).arg(_money).arg(_round));
 }
 
+#define FindAllHelper(className, str, vec)\
+QVector<className *> GameWindow::FindAll##str##InRange(int x, int y, int range)\
+{\
+    QVector<className *> res;\
+    for(auto& tar : vec)\
+    {\
+        if(DISTANCE(x-tar->x(), y-tar->y()) <= range)\
+            res.push_back(tar);\
+    }\
+    return res;\
+}
+FindAllHelper(Enemy, Enemies, _enemies)
+FindAllHelper(Hero, Heros, _heros)
+FindAllHelper(Tower, Towers, _towers)
+
+#define FindOneHelper(className, vec)\
+className * GameWindow::FindOneLiving##className##InRange(int x, int y, int range)\
+{\
+    for(auto& tar : vec)\
+    {\
+        if(DISTANCE(x-tar->x(), y-tar->y()) <= range && tar->IsAlive())\
+            return tar;\
+    }\
+    return nullptr;\
+}
+FindOneHelper(Enemy, _enemies)
+FindOneHelper(Hero, _heros)
+FindOneHelper(Tower, _towers)
 
 Cell *GameWindow::GetAt(int r, int c)
 {

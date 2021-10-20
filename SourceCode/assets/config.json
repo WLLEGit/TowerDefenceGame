@@ -1,0 +1,83 @@
+{
+    "Enemies":{
+        "EnemyFly1":{
+            "maxHealth":20,
+            "attack":3,
+            "dealHealthDamage":1,
+            "attackInterval":1,
+            "attackRangeRate":1,
+            "speedRate": 1.0,
+            "enemyName":"EnemyFly1",
+            "maxIndex":1,
+            "picHeightRate":0.7,
+            "isFlying":true,
+            "isMilitant":true
+        },
+        "EnemyFly2":{
+            "maxHealth":10,
+            "attack":0,
+            "dealHealthDamage":1,
+            "attackInterval":1,
+            "attackRangeRate":0,
+            "speedRate": 0.8,
+            "enemyName":"EnemyFly2",
+            "maxIndex":1,
+            "picHeightRate":0.7,
+            "isFlying":true,
+            "isMilitant":false
+        },
+        "EnemyPig":{
+            "maxHealth":15,
+            "attack":2,
+            "dealHealthDamage":1,
+            "attackInterval":0.5,
+            "attackRangeRate":1,
+            "speedRate": 0.9,
+            "enemyName":"EnemyPig",
+            "maxIndex":2,
+            "picHeightRate":0.5,
+            "isFlying":false,
+            "isMilitant":true
+        },
+        "EnemyMonster":{
+            "maxHealth":15,
+            "attack":7,
+            "dealHealthDamage":2,
+            "attackInterval":1,
+            "attackRangeRate":2,
+            "speedRate": 0.5,
+            "enemyName":"EnemyMonster",
+            "maxIndex":2,
+            "picHeightRate":0.8,
+            "isFlying":false,
+            "isMilitant":true
+        },
+        "EnemyAntiTower":{
+            "maxHealth":20,
+            "attack":3,
+            "dealHealthDamage":1,
+            "attackInterval":1,
+            "attackRangeRate":0.9,
+            "enemyName":"EnemyAntiTower",
+            "maxIndex":1,
+            "picHeightRate":0.5,
+            "isFlying":false,
+            "isMilitant":true
+        },
+        "EnemyHealer":{
+            "maxHealth":15,
+            "attack":0,
+            "dealHealthDamage":1,
+            "attackInterval":2,
+            "attackRangeRate":0.9,
+            "enemyName":"EnemyHealer",
+            "maxIndex":3,
+            "picHeightRate":1,
+            "isFlying":false,
+            "isMilitant":false
+        }
+    },
+    "Heros":{
+
+    }
+}
