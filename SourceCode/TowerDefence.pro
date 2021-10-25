@@ -21,6 +21,7 @@ SOURCES += \
     gamewindow.cpp \
     header.cpp \
     hero.cpp \
+    livingunit.cpp \
     main.cpp \
     mainwindow.cpp \
     tower.cpp
@@ -31,6 +32,7 @@ HEADERS += \
     gamewindow.h \
     header.h \
     hero.h \
+    livingunit.h \
     mainwindow.h \
     tower.h
 
@@ -51,4 +53,4 @@ RESOURCES += \
     enemies.qrc \
     heros.qrc \
     map.qrc \
-    tower.qrc
+    towers.qrc

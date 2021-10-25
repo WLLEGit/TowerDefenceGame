@@ -1,31 +1,10 @@
 #include "enemy.h"
 #include "gamewindow.h"
 
-Enemy::Enemy(QWidget* parent)
-    :QLabel(parent)
+Enemy::Enemy(QWidget* parent, GameWindow* gameWindow)
+    :LivingUnit(parent, gameWindow)
 {
     setAttribute(Qt::WA_TransparentForMouseEvents, true);   //对鼠标事件穿透
-
-    _picTimer = new QTimer;
-    _attackTimer = new QTimer();
-
-    _healthBar = new QProgressBar(parent);
-    _healthBar->setMinimum(0);
-    _healthBar->setMaximum(100);
-    _healthBar->setStyleSheet("QProgressBar{background:rgba(255,255,255,0);} QProgressBar::chunk{border-radius:5px;background:red}");
-    _healthBar->setTextVisible(false);
-    _healthBar->setValue(100);
-    DrawHealthLine();
-
-    connect(this->_picTimer, &QTimer::timeout, this, &Enemy::SwithPic);
-    connect(this->_attackTimer, &QTimer::timeout, this, &Enemy::Attack);
-}
-
-void Enemy::DrawHealthLine()
-{
-    _healthBar->setGeometry(x(), y()-CELLWIDTH/10, CELLWIDTH*0.8, CELLWIDTH/10);
-    _healthBar->setValue((float)_curHealth/_maxHealth * 100);
-    _healthBar->update();
 }
 
 void Enemy::LoadConfig(QString enemyName)
@@ -36,9 +15,9 @@ void Enemy::LoadConfig(QString enemyName)
     _attack = enemyConfig["attack"].toInt();
     _dealHealthDamage = enemyConfig["dealHealthDamage"].toInt();
     _attackInterval = enemyConfig["attackInterval"].toDouble();
-    _attackRange = enemyConfig["attackRangeRate"].toDouble()*CELLWIDTH;
+    _range = enemyConfig["attackRangeRate"].toDouble()*CELLWIDTH;
     _speed = enemyConfig["speedRate"].toDouble()*CELLWIDTH/FPS;
-    _enemyName = enemyConfig["enemyName"].toString();
+    _name = enemyConfig["name"].toString();
     _maxIndex = enemyConfig["maxIndex"].toInt();
     _curIndex = 0;
     _picHeight = CELLWIDTH*enemyConfig["picHeightRate"].toDouble();
@@ -46,28 +25,29 @@ void Enemy::LoadConfig(QString enemyName)
     _isFlying = enemyConfig["isFlying"].toBool();
 }
 
-#define CaseHelper(type, className) \
+#define CaseHelper(type, gameWindow, className) \
     case type:\
-        enemy = new className(parent);\
+        enemy = new className(parent, gameWindow);\
         enemy->InitBornLocation(gameWindow, bornCell, cellType);\
-        break;
-Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindow* gameWindow, Cell::CellType cellType)
+    break;
+
+Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindow *gameWindow, Cell::CellType cellType)
 {
     Enemy* enemy;
     switch (type) {
-    CaseHelper(0, EnemyPig)
-    CaseHelper(1, EnemyMonster)
-    CaseHelper(2, EnemyHealer)
-    CaseHelper(3, EnemyAntiTower)
-    CaseHelper(4, EnemyFly1)
-    CaseHelper(5, EnemyFly2)
+    CaseHelper(0, gameWindow, EnemyPig)
+    CaseHelper(1, gameWindow, EnemyMonster)
+    CaseHelper(2, gameWindow, EnemyHealer)
+    CaseHelper(3, gameWindow, EnemyAntiTower)
+    CaseHelper(4, gameWindow, EnemyFly1)
+    CaseHelper(5, gameWindow, EnemyFly2)
     default:
         enemy = nullptr;
     }
     return enemy;
 }
 
-void Enemy::Update(GameWindow *gameWindow)
+void Enemy::Update()
 {
     if(_status == Dead)
         return;
@@ -99,7 +79,7 @@ void Enemy::Update(GameWindow *gameWindow)
         _status = Moving;   //畏战敌人无攻击行为
     else if(_status != Fighting || !_target || !_target->IsAlive())   //如果在战斗中则不寻找新的状态
     {
-        Hero* barrierFU = gameWindow->FindOneHeroInRange(this->x(), this->y(), _attackRange);
+        Hero* barrierFU = gameWindow->FindOneHeroInRange(this->x(), this->y(), _range);
         if(barrierFU)
         {
             _status = Fighting;
@@ -131,7 +111,7 @@ void Enemy::Update(GameWindow *gameWindow)
         }
     }
     //调用特殊能力
-    SpecialAbility(gameWindow);
+    SpecialAbility();
     //Update Status
     DrawHealthLine();
 }
@@ -158,7 +138,7 @@ void Enemy::InitBornLocation(GameWindow *gameWindow, Cell *bornCell, Cell::CellT
 void Enemy::SwithPic()
 {
     _curIndex = (_curIndex + 1) % (_maxIndex);
-    QPixmap pix(QString(":/assets/monsters/%1%2.png").arg(_enemyName).arg(_curIndex + ((*_path)[_posIndex+1]->col()-(*_path)[_posIndex]->col() > 0 ? _maxIndex : 0)));
+    QPixmap pix(QString(":/assets/monsters/%1%2.png").arg(_name).arg(_curIndex + ((*_path)[_posIndex+1]->col()-(*_path)[_posIndex]->col() > 0 ? _maxIndex : 0)));
     pix = pix.scaledToHeight(_picHeight);
     this->resize(pix.width(), pix.height());
     this->setPixmap(pix);
@@ -180,10 +160,10 @@ void Enemy::Attack()
 }
 
 #define ConstructorCodeHelper(NAME)\
-NAME::NAME(QWidget* parent)\
-    :Enemy(parent)\
+NAME::NAME(QWidget* parent, GameWindow* gameWindow)\
+    :Enemy(parent, gameWindow)\
 {\
-    InitConfig(QString(#NAME));\
+    LoadConfig(QString(#NAME));\
 }
 ConstructorCodeHelper(EnemyFly1)
 ConstructorCodeHelper(EnemyFly2)
@@ -193,17 +173,17 @@ ConstructorCodeHelper(EnemyAntiTower)
 ConstructorCodeHelper(EnemyHealer)
 
 #define SpecialAbilityCodeHelper(NAME) \
-    void NAME::SpecialAbility(GameWindow*){}
+    void NAME::SpecialAbility(){}
 SpecialAbilityCodeHelper(EnemyFly1)
 SpecialAbilityCodeHelper(EnemyFly2)
 SpecialAbilityCodeHelper(EnemyPig)
 SpecialAbilityCodeHelper(EnemyMonster)
 SpecialAbilityCodeHelper(EnemyAntiTower)
 
-void EnemyHealer::SpecialAbility(GameWindow* gameWindow)
+void EnemyHealer::SpecialAbility()
 {
     //治愈范围内所有敌方单位
-    auto targets = gameWindow->FindAllEnemiesInRange(this->x(), this->y(), _attackRange);
+    auto targets = gameWindow->FindAllEnemiesInRange(this->x(), this->y(), _range);
     for(auto& tar : targets)
         if(tar->IsAlive())
             tar->BeAttacked(-5);

@@ -6,17 +6,17 @@
 #include "cell.h"
 
 
-class Tower : public QLabel     //塔
+class Tower : public LivingUnit     //塔
 {
     Q_OBJECT
 protected:
+    GameWindow* gameWindow;
+
     int _cost;
     int _level;
     int _maxLevel;
-    int _range;
-    double _attack;
-    double _attackInterval;
     Enemy* _target=nullptr;
+    Hero* _heroGened=nullptr;
     Cell* _posCell;
     QString _towerPicPrefix;
     QString _bulletPicPath;
@@ -24,21 +24,17 @@ protected:
     int _bulletSpeed;
     int _bulletLength;   //子弹长度
 
-    QTimer _attackTimer;
-
-    bool _toAttack;
-
     bool _canAttackFly;
     bool _canPlaceGuarder;
 
 protected:
     inline bool InRange(int x, int y);
-    void LoadConfig(QString towerName);
-    void Attack(GameWindow* gameWindow);
+    void LoadConfig(QString towerName) override;
+    void Attack() override;
 
 public:
-    Tower(QWidget* parent=nullptr, int _cost=0, int _level=0, int _range=0, double _attack=0, double _attackInterval=0, Cell* _posCell=nullptr);
-    void Update(GameWindow* gameWindow);
+    Tower(QWidget* parent=nullptr, GameWindow* gameWindow=nullptr, Cell* _posCell=nullptr);
+    void Update() override;
     void Upgrade(); //升级
     inline Cell* GetPositionCell(){return _posCell;}
     inline int Level(){return _level;}
@@ -46,24 +42,28 @@ public:
     void mousePressEvent(QMouseEvent *ev) override;
 
     int Cost(){return _cost;}
+    virtual int Type(){return -1;}
 
-    bool IsAlive() {return true;}
+    static Tower* GenerateTower(QWidget* parent, GameWindow* gameWindow, Cell* _posCell, int type);
+
 
 signals:
     void TowerPressed(Tower*);
 
 };
 
-#define TowerDefineHelper(className)\
+#define TowerDefineHelper(className, type)\
 class className : public Tower     \
 {\
 public:\
-    className(QWidget* parent, Cell* _posCell);\
+    className(QWidget* parent, GameWindow* gameWindow, Cell* _posCell);\
+    void SpecialAbility() override;\
+    int Type() override{return type;}\
 };
 
-TowerDefineHelper(ArrowTower)
-TowerDefineHelper(MissleTower)
-TowerDefineHelper(GuardTower)
+TowerDefineHelper(ArrowTower, 1)
+TowerDefineHelper(MissleTower, 2)
+TowerDefineHelper(GuardTower, 3)
 
 
 class Bullet : public QLabel        //子弹
@@ -86,8 +86,6 @@ public:
 
 signals:
     void HitEnemy(Bullet*);
-
-
 };
 
 

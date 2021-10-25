@@ -28,8 +28,13 @@ GameWindow::GameWindow(QWidget *parent, int mapID, int roundID) :
     connect(ui->undoSelectBtn, &QPushButton::clicked, this, [=](){UnitSelected(0);});
     connect(ui->hero1, &QPushButton::clicked, this, [=](){UnitSelected(0x11);});
     connect(ui->hero2, &QPushButton::clicked, this, [=](){UnitSelected(0x12);});
+    connect(ui->spikeweed, &QPushButton::clicked, this, [=](){UnitSelected(0x13);});
+    connect(ui->wallnut, &QPushButton::clicked, this, [=](){UnitSelected(0x14);});
+
     connect(ui->arrowTower, &QPushButton::clicked, this, [=](){UnitSelected(0x21);});
     connect(ui->missileTower, &QPushButton::clicked, this, [=](){UnitSelected(0x22);});
+    connect(ui->guardTower, &QPushButton::clicked, this, [=](){UnitSelected(0x23);});
+
     connect(ui->deleteHeroBtn, &QPushButton::clicked, this, [=](){UnitSelected(-1);});
 
     //ui main loop
@@ -350,13 +355,13 @@ void GameWindow::UpdateOneFrame()
     }
 
     for(auto& enemy : _enemies)
-        enemy->Update(this);
+        enemy->Update();
 
     for(auto& tower : _towers)
-        tower->Update(this);
+        tower->Update();
 
     for(auto& hero : _heros)
-        hero->Update(this);
+        hero->Update();
 
     for(auto& bullet : _bullets)
         bullet->Update(this);
@@ -386,6 +391,19 @@ bool GameWindow::OnHeroDead(Hero *hero)
     return _heros.removeOne(hero);
 }
 
+
+#define SelectHelper(meta, t, className)\
+    else if(type == t)\
+    {\
+        auto tmp = globalConfig[#meta].toObject()[#className].toObject();\
+        cost = tmp["cost"].toInt();\
+        if(_money >= cost)\
+        {\
+            ui->label->setText(QString("%1 Selected").arg(tmp["name"].toString()));\
+            _waitToPlaceType = type;\
+            _waitToCost = cost;\
+        }\
+    }
 void GameWindow::UnitSelected(int type)
 {
     if(type == 0)   //reset
@@ -404,24 +422,22 @@ void GameWindow::UnitSelected(int type)
     else if(type & 0x10)    //hero
     {
         UnitSelected(0);
-        int cost = (type == 0x11 ? HERO1COST : (type == 0x12 ? HERO2COST : 10000));
-        if(_money >= cost)
-        {
-            ui->label->setText(QString("Hero%1 Selected").arg(type&0xf));
-            _waitToPlaceType = type;
-            _waitToCost = cost;
-        }
+        int cost;
+        if(false);
+        SelectHelper(Heros, 0x11, Warrior)
+        SelectHelper(Heros, 0x12, Magician)
+        SelectHelper(Heros, 0x13, Spikeweed)
+        SelectHelper(Heros, 0x14, WallNut)
     }
     else if(type & 0x20)    //tower
     {
         UnitSelected(0);
-        int cost = type == 0x21 ? ARROWCOST : (type == 0x22 ? MISSILECOST : 10000);
-        if(_money >= cost)
-        {
-            ui->label->setText(QString("%1Tower Selected").arg(type == 0x21 ? "Arrow" : (type == 0x22 ? "Missile" : "UNKNOWN")));
-            _waitToPlaceType = type;
-            _waitToCost = cost;
-        }
+
+        int cost;
+        if(false);
+        SelectHelper(Towers, 0x21, ArrowTower)
+        SelectHelper(Towers, 0x22, MissleTower)
+        SelectHelper(Towers, 0x23, GuardTower)
     }
 }
 
@@ -485,13 +501,7 @@ Hero* GameWindow::CreateHero(int type, Cell* cell)
 
 Tower *GameWindow::CreateTower(int type, Cell *cell)
 {
-    Tower* t=nullptr;
-    if(type == 1)
-        t = new ArrowTower(this, cell);
-    else if(type == 2)
-        t = new MissleTower(this, cell);
-    else
-        t = new ArrowTower(this, cell);
+    Tower* t=Tower::GenerateTower(this, this, cell, type);
     t->show();
     connect(t, &Tower::TowerPressed, this, &GameWindow::OnTowerPressed);
     _towers.push_back(t);
@@ -547,6 +557,17 @@ Hero * GameWindow::FindOneHeroInRange(int x, int y, int range)
         if(DISTANCE(x-hero->x(), y-hero->y()) <= range && hero->IsAlive() && hero->CanHoldEnemy())
             return hero;
     }
+    return nullptr;
+}
+
+Cell* GameWindow::FindOnePathCellInRange(int x, int y, int range, int isFly)
+{
+    for(auto& line: _cells)
+        for(auto& cell : line)
+        {
+            if(DISTANCE(cell->x()-x, cell->y()-y)<=range && (cell->GetCellTypeID()&Cell::Path) && (isFly || cell->GetCellTypeID() != Cell::White))
+                return cell;
+        }
     return nullptr;
 }
 

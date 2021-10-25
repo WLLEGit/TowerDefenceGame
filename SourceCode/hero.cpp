@@ -2,7 +2,7 @@
 
 #include "gamewindow.h"
 Hero::Hero(QWidget *parent, GameWindow* gameWindow, Cell* posCell)
-    :QLabel(parent), _posCell(posCell)
+    :LivingUnit(parent, gameWindow), _posCell(posCell)
 {
     setGeometry(posCell->x(), posCell->y(), CELLWIDTH, CELLWIDTH);
 
@@ -12,21 +12,10 @@ Hero::Hero(QWidget *parent, GameWindow* gameWindow, Cell* posCell)
 
     _curIndex = 0;
     _maxIndex = 4;
-    _picTimer = new QTimer(this);
-    SwitchPic();
+
     _picTimer->start(1000*_picInterval);
-    connect(_picTimer, &QTimer::timeout, this, &Hero::SwitchPic);
 
-    _attackTimer = new QTimer(this);
-    connect(_attackTimer, &QTimer::timeout, this, &Hero::Attack);
     _attackTimer->start(_attackInterval*1000);
-
-    healthBar = new QProgressBar(parent);
-    healthBar->setMinimum(0);
-    healthBar->setMaximum(100);
-    healthBar->setStyleSheet("QProgressBar{background:rgba(255,255,255,0);} QProgressBar::chunk{border-radius:5px;background:red}");
-    healthBar->setTextVisible(false);
-
 }
 
 void Hero::AddEnemy(Enemy *enemy)
@@ -75,20 +64,13 @@ void Hero::FindEnemy()
     }
 }
 
-void Hero::DrawHealthLine()
-{
-    healthBar->setGeometry(x(), y()-CELLWIDTH/10, CELLWIDTH*0.8, CELLWIDTH/10);
-    healthBar->setValue((float)_curHealth/_maxHealth * 100);
-    healthBar->update();
-}
-
 void Hero::mousePressEvent(QMouseEvent *ev)
 {
     emit HeroPressed(this);
     QLabel::mousePressEvent(ev);
 }
 
-void Hero::Update(GameWindow*)
+void Hero::Update()
 {
     if(_isDestoried)
     {

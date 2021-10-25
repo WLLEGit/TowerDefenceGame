@@ -10,6 +10,8 @@ bool Tower::InRange(int x, int y)
 void Tower::LoadConfig(QString towerName)
 {
     QJsonObject towerConfig = globalConfig["Towers"].toObject()[towerName].toObject();
+    _maxHealth = towerConfig["maxHealth"].toInt();
+    _curHealth = _maxHealth;
     _cost = towerConfig["cost"].toInt();
     _level = 1;
     _maxLevel = towerConfig["maxLevel"].toInt();
@@ -24,56 +26,47 @@ void Tower::LoadConfig(QString towerName)
     _canPlaceGuarder = towerConfig["canPlaceGuarder"].toBool();
 }
 
-void Tower::Attack(GameWindow *gameWindow)
+void Tower::Attack()
 {
-    if(_target && _target->IsAlive())
+    if(_attack)
     {
-        gameWindow->CreateBullet(_target, this, _bulletSpeed, _attack, QPixmap(_bulletPicPath).scaledToHeight(_bulletLength));
+        if(_target && _target->IsAlive())
+        {
+            gameWindow->CreateBullet(_target, this, _bulletSpeed, _attack, QPixmap(_bulletPicPath).scaledToHeight(_bulletLength));
+        }
+        else
+        {
+            _target = nullptr;
+            _attackTimer->stop();
+        }
     }
     else
-    {
-        _target = nullptr;
-        _attackTimer.stop();
-    }
+        _attackTimer->stop();
 }
 
 
-Tower::Tower(QWidget *parent, int cost, int level, int range, double attack, double attackInterval, Cell* locationCell)
-    :QLabel(parent), _cost(cost), _level(level), _range(range), _attack(attack), _attackInterval(attackInterval), _posCell(locationCell)
+Tower::Tower(QWidget* parent, GameWindow* gameWindow, Cell* _posCell)
+    :LivingUnit(parent, gameWindow), _posCell(_posCell)
 {
-    connect(&_attackTimer, &QTimer::timeout, this, [=](){_toAttack=true;});
-    setGeometry(locationCell->x(), locationCell->y(), CELLWIDTH*1.2, CELLWIDTH*1.2);
-    _toAttack = false;
+    setGeometry(_posCell->x(), _posCell->y(), CELLWIDTH*1.2, CELLWIDTH*1.2);
 }
 
-void Tower::Update(GameWindow* gameWindow)
+void Tower::Update()
 {
-    if(!_target || !_target->IsAlive() || !InRange(_target->x(), _target->y()))
+    if(_attack)
     {
-        _target = nullptr;
-        for(auto& enemy : gameWindow->_enemies)
-            if(InRange(enemy->x(), enemy->y()) && enemy->IsAlive())
-            {
-                _target = enemy;
-                break;
-            }
-    }
-    if(_target)
-    {
-        if(_toAttack)
+        if(!_target || !_target->IsAlive() || !InRange(_target->x(), _target->y()))
         {
-            Attack(gameWindow);
-            _toAttack = false;
+            _target = gameWindow->FindOneEnemyInRange(x(), y(), _range*CELLWIDTH);
         }
-        if(!_attackTimer.isActive())
+        if(_target && !_attackTimer->isActive())
         {
-            Attack(gameWindow);
-            _attackTimer.start(_attackInterval * 1000);
+            _attackTimer->start(_attackInterval);
+            setPixmap(RotatePixmap(_towerpic, _target, this));
         }
-
-        setPixmap(RotatePixmap(_towerpic, _target, this));
-
     }
+    else
+        SpecialAbility();
 }
 
 void Tower::Upgrade()
@@ -91,31 +84,49 @@ void Tower::mousePressEvent(QMouseEvent *ev)
     QLabel::mousePressEvent(ev);
 }
 
-
-ArrowTower::ArrowTower(QWidget *parent, Cell* locationCell) //dps=4
-    :    Tower(parent, ARROWCOST, 1, 2, 1, 0.2, locationCell)
+Tower *Tower::GenerateTower(QWidget *parent, GameWindow *gameWindow, Cell *posCell, int type)
 {
-    _bulletSpeed = CELLWIDTH;
-    _bulletLength = CELLWIDTH / 3;
-    _towerPicPrefix = ":/assets/towers/MG%1.png";
-    _towerpic = QPixmap(_towerPicPrefix.arg(_level));
-    _towerpic = _towerpic.scaledToHeight(CELLWIDTH);
-    _bulletPicPath = ":/assets/towers/Bullet_MG.png";
-    setPixmap(_towerpic);
+    if(type == 1)
+        return new ArrowTower(parent, gameWindow, posCell);
+    else if(type == 2)
+        return new MissleTower(parent, gameWindow, posCell);
+    else if(type == 3)
+        return new GuardTower(parent, gameWindow, posCell);
+    return nullptr;
 }
 
-MissleTower::MissleTower(QWidget *parent, Cell* locationCell)   //dps=6
-    :    Tower(parent, MISSILECOST, 1, 5, 6, 2, locationCell)
-{
-    _bulletSpeed = CELLWIDTH * 0.7;
-    _bulletLength = CELLWIDTH * 0.7;
-    _towerPicPrefix = ":/assets/towers/Missile_Launcher%1.png";
-    _towerpic = QPixmap(_towerPicPrefix.arg(_level));
-    _towerpic = _towerpic.scaledToHeight(CELLWIDTH);
-    _bulletPicPath = ":/assets/towers/Missile.png";
-    setPixmap(_towerpic);
-    show();
+#define TowerConstructorHelper(className)\
+className::className(QWidget *parent, GameWindow* gameWindow, Cell* locationCell) \
+    :Tower(parent, gameWindow, locationCell)\
+{\
+    LoadConfig(#className);\
+    _towerpic = QPixmap(_towerPicPrefix.arg(_level));\
+    _towerpic = _towerpic.scaledToHeight(CELLWIDTH);\
+    setPixmap(_towerpic);\
 }
+
+TowerConstructorHelper(ArrowTower)
+TowerConstructorHelper(MissleTower)
+TowerConstructorHelper(GuardTower)
+
+void ArrowTower::SpecialAbility(){}
+void MissleTower::SpecialAbility(){}
+void GuardTower::SpecialAbility()
+{
+    //放置防卫英雄
+    if(!_heroGened && !_attackTimer->isActive())
+    {
+        Cell* pos = gameWindow->FindOnePathCellInRange(x(), y(), _range*CELLWIDTH);
+        if(pos)
+            Hero::GenerateHero(gameWindow, gameWindow, pos, 4);
+    }
+    else if(_heroGened && !_heroGened->IsAlive())
+    {
+        _heroGened = nullptr;
+        _attackTimer->start(_attackInterval*1000);
+    }
+}
+
 
 
 Bullet::Bullet(QWidget *parent, Enemy *target, Tower *sender, int speed, int damage, QPixmap pic)
@@ -143,5 +154,4 @@ void Bullet::Update(GameWindow *)
     }
     setPixmap(RotatePixmap(_pic, _target, this));
     setGeometry(x() + deltaX / dis * _speed, y() + deltaY / dis * _speed, this->width(), this->height());
-
 }

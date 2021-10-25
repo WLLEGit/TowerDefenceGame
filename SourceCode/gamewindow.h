@@ -117,10 +117,12 @@ public:
     Hero* FindOneHeroInRange(int x, int y, int range);
     Tower* FindOneTowerInRange(int x, int y, int range);
 
+    Cell* FindOnePathCellInRange(int x, int y, int range, int isFly=false);
 
-    friend void Enemy::Update(GameWindow*);
-    friend void Tower::Update(GameWindow*);
-    friend void Hero::Update(GameWindow*);
+
+    friend void Enemy::Update();
+    friend void Tower::Update();
+    friend void Hero::Update();
 };
 
 #endif // GAMEWINDOW_H

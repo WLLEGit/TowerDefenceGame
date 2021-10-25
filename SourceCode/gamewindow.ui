@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1221</width>
+    <width>1336</width>
     <height>1080</height>
    </rect>
   </property>
@@ -130,13 +130,61 @@
      <string>删除英雄</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="wallnut">
+    <property name="geometry">
+     <rect>
+      <x>1190</x>
+      <y>60</y>
+      <width>100</width>
+      <height>100</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">image: url(:/assets/heros/WallNut_0.png);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="spikeweed">
+    <property name="geometry">
+     <rect>
+      <x>1190</x>
+      <y>180</y>
+      <width>100</width>
+      <height>100</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">image: url(:/assets/heros/Spikeweed_1.png)</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="guardTower">
+    <property name="geometry">
+     <rect>
+      <x>1190</x>
+      <y>310</y>
+      <width>100</width>
+      <height>100</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">image: url(:/assets/towers/GuardTower.png);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1221</width>
+     <width>1336</width>
      <height>26</height>
     </rect>
    </property>

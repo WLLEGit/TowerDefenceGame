@@ -5,7 +5,7 @@
 #include "enemy.h"
 #include "cell.h"
 
-class Hero : public QLabel  //友方单位
+class Hero : public LivingUnit  //友方单位
 {
     Q_OBJECT
 
@@ -17,11 +17,10 @@ public:
     void AddEnemy(Enemy* enemy);
     bool RemoveEnemy(Enemy* enemy);
 
-    inline void BeAttacked(int damage){_curHealth -= damage; DrawHealthLine();}
-    bool IsAlive(){return !_isDestoried && _curHealth > 0;}
+    bool IsAlive() override{return !_isDestoried && _curHealth > 0;}
     inline float GetHealthRate(){return (float)_curHealth / _maxHealth;}
 
-    void Update(GameWindow* gameWindow=nullptr);
+    void Update() override;
 
     static Hero* GenerateHero(QWidget* parent, GameWindow* gameWindow, Cell* _posCell, int type);
 
@@ -31,8 +30,8 @@ public:
 
 protected:
     void SwitchPic();
-    void LoadConfig(QString name);
-    void Attack();
+    void LoadConfig(QString name) override;
+    void Attack() override;
     bool InRange(int x, int y);
     void FindEnemy();
 
@@ -45,19 +44,9 @@ protected:
     Cell* _posCell;
     int _capacityUsed;
     int _maxCapacity;
-    int _curHealth;
-    int _maxHealth;
-    int _attack;
-    double _attackInterval;
-    QString _name;
-    int _range;
     int _cost;
-    QTimer* _picTimer;
-    double _picInterval;
-    int _curIndex;
-    int _maxIndex;
+
     QList<Enemy*> _enemiesHold;
-    QTimer* _attackTimer;
 
     QVector<Enemy*> _targets;
 
@@ -66,8 +55,7 @@ protected:
 
 
 public:
-    QProgressBar* healthBar;
-    void DrawHealthLine();
+    QProgressBar* healthBar;;
 
     void mousePressEvent(QMouseEvent *ev) override;
 
