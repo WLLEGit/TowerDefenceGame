@@ -53,13 +53,14 @@ public:
     inline float GetHealthRate(){return (float)_curHealth / _maxHealth;}
     void OnDead();
     void Show(){show(); _healthBar->show();}
+    inline bool IsFlying(){return _isFlying;}
 
 
 protected:
     void SwithPic();
     inline void Attack();
     void DrawHealthLine();
-    void InitConfig(QString enemyName);
+    void LoadConfig(QString enemyName);
     void InitBornLocation(GameWindow* gameWindow, Cell* bornCell, Cell::CellType cellType);
     virtual void SpecialAbility(GameWindow*){};
 };

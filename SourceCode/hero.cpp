@@ -1,71 +1,84 @@
 #include "hero.h"
 
 #include "gamewindow.h"
-Hero::Hero(QWidget *parent, Cell* posCell, int maxCapacity, int attack, \
-           int maxHealth, double attackInterval, QString name, int range, int cost)
-    :QLabel(parent), posCell(posCell), capacity(maxCapacity), maxCapacity(maxCapacity), curHealth(maxHealth),\
-      maxHealth(maxHealth), attack(attack), attackInterval(attackInterval), name(name), range(range), cost(cost)
+Hero::Hero(QWidget *parent, GameWindow* gameWindow, Cell* posCell)
+    :QLabel(parent), _posCell(posCell)
 {
     setGeometry(posCell->x(), posCell->y(), CELLWIDTH, CELLWIDTH);
 
-    target = nullptr;
-    isDestoried = false;
+    _isDestoried = false;
 
-    curIndex = 0;
-    maxIndex = 4;
-    picTimer = new QTimer(this);
+    _gameWindow = gameWindow;
+
+    _curIndex = 0;
+    _maxIndex = 4;
+    _picTimer = new QTimer(this);
     SwitchPic();
-    picTimer->start(400);
-    connect(picTimer, &QTimer::timeout, this, &Hero::SwitchPic);
+    _picTimer->start(1000*_picInterval);
+    connect(_picTimer, &QTimer::timeout, this, &Hero::SwitchPic);
 
-    attackTimer = new QTimer(this);
-    connect(attackTimer, &QTimer::timeout, this, &Hero::Attack);
+    _attackTimer = new QTimer(this);
+    connect(_attackTimer, &QTimer::timeout, this, &Hero::Attack);
+    _attackTimer->start(_attackInterval*1000);
 
     healthBar = new QProgressBar(parent);
     healthBar->setMinimum(0);
     healthBar->setMaximum(100);
     healthBar->setStyleSheet("QProgressBar{background:rgba(255,255,255,0);} QProgressBar::chunk{border-radius:5px;background:red}");
     healthBar->setTextVisible(false);
+
 }
 
 void Hero::AddEnemy(Enemy *enemy)
 {
-    assert(capacity);
-    capacity--;
-    targets.push_back(enemy);
+    //assert(_capacityUsed);
+    _capacityUsed--;
+    _enemiesHold.push_back(enemy);
 }
 
 bool Hero::RemoveEnemy(Enemy *enemy)
 {
     //assert(capacity < maxCapacity);
-    capacity++;
-    return targets.removeOne(enemy);
+    _capacityUsed++;
+    return _enemiesHold.removeOne(enemy);
 }
 
 void Hero::Attack()
 {
-    if(isDestoried)
+    if(_isDestoried)
         return;
-    if(target && target->IsAlive())
-    {
-        target->BeAttacked(attack);
-    }
-    else
-    {
-        target = nullptr;
-        attackTimer->stop();
-    }
+
+    FindEnemy();
+
+    if(_attack)
+        for(auto& enemy : _targets)
+            enemy->BeAttacked(_attack);
 }
 
 bool Hero::InRange(int x, int y)
 {
-    return DISTANCE(x-this->x(), y-this->y()) <= CELLWIDTH * (double)(range - 0.3);
+    return DISTANCE(x-this->x(), y-this->y()) <= CELLWIDTH * (double)(_range - 0.3);
+}
+
+void Hero::FindEnemy()
+{
+    _targets.clear();
+    auto rv = _gameWindow->FindAllEnemiesInRange(this->x(), this->y(), (_range - 0.3) * CELLWIDTH);
+    QVector<Enemy*> enemies;
+    std::copy_if(rv.begin(), rv.end(), std::back_inserter(enemies), [=](Enemy* e){return (_canAttackFly || !e->IsFlying());});
+    if(enemies.size())
+    {
+        if(_isAttackAll)
+            _targets = std::move(enemies);
+        else
+            _targets.push_back(enemies[0]);
+    }
 }
 
 void Hero::DrawHealthLine()
 {
     healthBar->setGeometry(x(), y()-CELLWIDTH/10, CELLWIDTH*0.8, CELLWIDTH/10);
-    healthBar->setValue((float)curHealth/maxHealth * 100);
+    healthBar->setValue((float)_curHealth/_maxHealth * 100);
     healthBar->update();
 }
 
@@ -75,70 +88,79 @@ void Hero::mousePressEvent(QMouseEvent *ev)
     QLabel::mousePressEvent(ev);
 }
 
-void Hero::Update(GameWindow* gameWindow)
+void Hero::Update(GameWindow*)
 {
-    if(isDestoried)
+    if(_isDestoried)
     {
-        attackTimer->stop();
-        picTimer->stop();
+        _attackTimer->stop();
+        _picTimer->stop();
         return;
     }
 
-    if(curHealth <= 0)
+    if(_curHealth <= 0)
     {
         this->hide();
         healthBar->hide();
-        isDestoried = true;
-        attackTimer->stop();
-        picTimer->stop();
+        _isDestoried = true;
+        _attackTimer->stop();
+        _picTimer->stop();
         emit HeroDead(this);
-    }
-    if(!target || !target->IsAlive() || !InRange(target->x(), target->y()))
-    {
-        target = nullptr;
-        for(auto& enemy : gameWindow->_enemies)
-            if(InRange(enemy->x(), enemy->y()) && enemy->IsAlive())
-            {
-                target = enemy;
-                break;
-            }
-    }
-    if(target)
-    {
-        if(!attackTimer->isActive())
-            attackTimer->start(attackInterval * 1000);
     }
     DrawHealthLine();
 }
 
-Hero *Hero::GenerateHero(QWidget *parent, Cell *posCell, int type)
+Hero *Hero::GenerateHero(QWidget *parent, GameWindow* gameWindow, Cell *posCell, int type)
 {
     if(posCell->GetCellType() != Cell::Path)
         return nullptr;
 
     if(type == 1)
-        return new Hero1(parent, posCell);
+        return new Warrior(parent, gameWindow, posCell);
     else if(type == 2)
-        return new Hero2(parent, posCell);
+        return new Magician(parent, gameWindow, posCell);
+    else if(type == 3)
+        return new Spikeweed(parent, gameWindow, posCell);
+    else if(type == 4)
+        return  new WallNut(parent, gameWindow, posCell);
     else
-        return new Hero1(parent, posCell);
+        return new Warrior(parent, gameWindow, posCell);
 }
 
 void Hero::SwitchPic()
 {
-    curIndex = (curIndex + 1) % (maxIndex);
-    QPixmap pix(QString(":/assets/heros/%1_r%2.png").arg(name).arg(curIndex));
+    _curIndex = (_curIndex + 1) % (_maxIndex);
+    QPixmap pix(QString(":/assets/heros/%1%2.png").arg(_name).arg(_curIndex));
     pix = pix.scaledToHeight(CELLWIDTH*0.8);
     this->resize(pix.width(), pix.height());
     this->setPixmap(pix);
 }
 
-Hero1::Hero1(QWidget *parent, Cell *posCell)
-    :Hero(parent, posCell, 3, 5, 50, 0.8, "one", 1, HERO1COST)
+void Hero::LoadConfig(QString name)
 {
+    QJsonObject heroConfig = globalConfig["Heros"].toObject()[name].toObject();
+    _maxHealth = heroConfig["maxHealth"].toInt();
+    _curHealth = _maxHealth;
+    _maxCapacity = heroConfig["maxCapacity"].toInt();
+    _capacityUsed = 0;
+    _attack = heroConfig["attack"].toInt();
+    _attackInterval = heroConfig["attackInterval"].toDouble();
+    _name = heroConfig["name"].toString();
+    _range = heroConfig["range"].toDouble();
+    _cost = heroConfig["cost"].toInt();
+    _picInterval = heroConfig["picInterval"].toDouble();
+    _curIndex = 0;
+    _maxIndex = heroConfig["maxIndex"].toInt();
+    _isAttackAll = heroConfig["isAttackAll"].toBool();
+    _canAttackFly = heroConfig["canAttackFly"].toBool();
 }
 
-Hero2::Hero2(QWidget *parent, Cell *posCell)
-    :Hero(parent, posCell, 2, 10, 25, 0.8, "two", 3, HERO2COST)
-{
+#define HeroConstructorHelper(className)\
+className::className(QWidget *parent, GameWindow* gameWindow, Cell *posCell)\
+{\
+    LoadConfig(#className);\
+    Hero(parent, gameWindow, posCell);\
 }
+HeroConstructorHelper(Warrior)
+HeroConstructorHelper(Magician)
+HeroConstructorHelper(Spikeweed)
+HeroConstructorHelper(WallNut)

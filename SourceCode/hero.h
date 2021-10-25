@@ -10,52 +10,60 @@ class Hero : public QLabel  //友方单位
     Q_OBJECT
 
 public:
-    Hero(QWidget* parent, Cell* posCell, int maxCapacity,  \
-         int maxHealth, int attack, double attackInterval, QString name, int range, int cost);
-    Cell* GetPositionCell(){return posCell;}
+    Hero(QWidget* parent=nullptr, GameWindow* gameWindow=nullptr, Cell* _posCell=nullptr);
+    Cell* GetPositionCell(){return _posCell;}
 
-    bool CanHoldEnemy(){return IsAlive() && capacity > 0;}
+    bool CanHoldEnemy(){return IsAlive() && _capacityUsed > 0;}
     void AddEnemy(Enemy* enemy);
     bool RemoveEnemy(Enemy* enemy);
 
-    inline void BeAttacked(int damage){curHealth -= damage; DrawHealthLine();}
-    bool IsAlive(){return !isDestoried && curHealth > 0;}
-    inline float GetHealthRate(){return (float)curHealth / maxHealth;}
+    inline void BeAttacked(int damage){_curHealth -= damage; DrawHealthLine();}
+    bool IsAlive(){return !_isDestoried && _curHealth > 0;}
+    inline float GetHealthRate(){return (float)_curHealth / _maxHealth;}
 
-    void Update(GameWindow* gameWindow);
+    void Update(GameWindow* gameWindow=nullptr);
 
-    static Hero* GenerateHero(QWidget* parent, Cell* posCell, int type);
+    static Hero* GenerateHero(QWidget* parent, GameWindow* gameWindow, Cell* _posCell, int type);
 
-    int Cost(){return cost;}
+    int Cost(){return _cost;}
 
     void Show(){show(); healthBar->show();}
 
 protected:
     void SwitchPic();
+    void LoadConfig(QString name);
+    void Attack();
+    bool InRange(int x, int y);
+    void FindEnemy();
 
 
 protected:
-    bool isDestoried;
+    bool _isDestoried;
 
-    Cell* posCell;
-    int capacity;
-    int maxCapacity;
-    int curHealth;
-    int maxHealth;
-    int attack;
-    double attackInterval;
-    QString name;
-    int range;
-    int cost;
-    QTimer* picTimer;
-    int curIndex;
-    int maxIndex;
-    QList<Enemy*> targets;
-    QTimer* attackTimer;
+    GameWindow* _gameWindow;
 
-    Enemy* target;
-    void Attack();
-    bool InRange(int x, int y);
+    Cell* _posCell;
+    int _capacityUsed;
+    int _maxCapacity;
+    int _curHealth;
+    int _maxHealth;
+    int _attack;
+    double _attackInterval;
+    QString _name;
+    int _range;
+    int _cost;
+    QTimer* _picTimer;
+    double _picInterval;
+    int _curIndex;
+    int _maxIndex;
+    QList<Enemy*> _enemiesHold;
+    QTimer* _attackTimer;
+
+    QVector<Enemy*> _targets;
+
+    bool _isAttackAll;
+    bool _canAttackFly;
+
 
 public:
     QProgressBar* healthBar;
@@ -68,16 +76,15 @@ signals:
     void HeroPressed(Hero*);
 };
 
-class Hero1 : public Hero
-{
-public:
-    Hero1(QWidget* parent, Cell* posCell);
+#define HeroDefinitionHelper(className)\
+class className : public Hero\
+{\
+public:\
+    className(QWidget* parent, GameWindow* gameWindow, Cell* _posCell);\
 };
-
-class Hero2 : public Hero
-{
-public:
-    Hero2(QWidget* parent, Cell* posCell);
-};
+HeroDefinitionHelper(Warrior)
+HeroDefinitionHelper(Magician)
+HeroDefinitionHelper(Spikeweed)
+HeroDefinitionHelper(WallNut)
 
 #endif // HERO_H

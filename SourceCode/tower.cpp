@@ -7,6 +7,23 @@ bool Tower::InRange(int x, int y)
     return DISTANCE(x-this->x(), y-this->y()) <= CELLWIDTH * (_range+0.2);
 }
 
+void Tower::LoadConfig(QString towerName)
+{
+    QJsonObject towerConfig = globalConfig["Towers"].toObject()[towerName].toObject();
+    _cost = towerConfig["cost"].toInt();
+    _level = 1;
+    _maxLevel = towerConfig["maxLevel"].toInt();
+    _range = towerConfig["range"].toDouble();
+    _attack = towerConfig["attack"].toInt();
+    _attackInterval = towerConfig["attackInterval"].toDouble();
+    _towerPicPrefix = towerConfig["name"].toString();
+    _bulletPicPath = towerConfig["bulletPicPath"].toString();
+    _bulletSpeed = towerConfig["bulletSpeed"].toDouble();
+    _bulletLength = towerConfig["bulletLength"].toDouble();
+    _canAttackFly = towerConfig["canAttackFly"].toBool();
+    _canPlaceGuarder = towerConfig["canPlaceGuarder"].toBool();
+}
+
 void Tower::Attack(GameWindow *gameWindow)
 {
     if(_target && _target->IsAlive())

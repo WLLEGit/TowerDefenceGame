@@ -427,7 +427,6 @@ void GameWindow::UnitSelected(int type)
 
 void GameWindow::OnCellPressed(Cell* cell)
 {
-    qDebug() << "Cell Pressed" << cell->row() << cell->col();
     if((_waitToPlaceType & 0x10) && CanCellPlaceHero(cell)) //放置英雄
     {
         CreateHero(_waitToPlaceType & 0xf, cell);
@@ -476,8 +475,7 @@ void GameWindow::OnBulletHitEnemy(Bullet *bullet)
 
 Hero* GameWindow::CreateHero(int type, Cell* cell)
 {
-    qDebug() << "CreatHero" << type << cell->row() << cell->col();
-    auto hero = Hero::GenerateHero(this, cell, type);
+    auto hero = Hero::GenerateHero(this, this, cell, type);
     hero->Show();
     _heros.push_back(hero);
     connect(hero, &Hero::HeroDead, this, &GameWindow::OnHeroDead);
@@ -520,28 +518,37 @@ QVector<className *> GameWindow::FindAll##str##InRange(int x, int y, int range)\
     QVector<className *> res;\
     for(auto& tar : vec)\
     {\
-        if(DISTANCE(x-tar->x(), y-tar->y()) <= range)\
+        if(tar->IsAlive() && DISTANCE(x-tar->x(), y-tar->y()) <= range)\
             res.push_back(tar);\
     }\
     return res;\
 }
+
 FindAllHelper(Enemy, Enemies, _enemies)
 FindAllHelper(Hero, Heros, _heros)
 FindAllHelper(Tower, Towers, _towers)
 
 #define FindOneHelper(className, vec)\
-className * GameWindow::FindOneLiving##className##InRange(int x, int y, int range)\
+className * GameWindow::FindOne##className##InRange(int x, int y, int range)\
 {\
     for(auto& tar : vec)\
     {\
-        if(DISTANCE(x-tar->x(), y-tar->y()) <= range && tar->IsAlive())\
+        if(DISTANCE(tar->IsAlive() && x-tar->x(), y-tar->y()) <= range)\
             return tar;\
     }\
     return nullptr;\
 }
 FindOneHelper(Enemy, _enemies)
-FindOneHelper(Hero, _heros)
 FindOneHelper(Tower, _towers)
+Hero * GameWindow::FindOneHeroInRange(int x, int y, int range)
+{
+    for(auto& hero : _heros)
+    {
+        if(DISTANCE(x-hero->x(), y-hero->y()) <= range && hero->IsAlive() && hero->CanHoldEnemy())
+            return hero;
+    }
+    return nullptr;
+}
 
 Cell *GameWindow::GetAt(int r, int c)
 {

@@ -28,7 +28,7 @@ void Enemy::DrawHealthLine()
     _healthBar->update();
 }
 
-void Enemy::InitConfig(QString enemyName)
+void Enemy::LoadConfig(QString enemyName)
 {
     QJsonObject enemyConfig = globalConfig["Enemies"].toObject()[enemyName].toObject();
     _maxHealth = enemyConfig["maxHealth"].toInt();
@@ -55,7 +55,7 @@ Enemy *Enemy::GenerateEnemy(int type, QWidget *parent, Cell* bornCell, GameWindo
 {
     Enemy* enemy;
     switch (type) {
-    CaseHelper(0, EnemyFly1)
+    CaseHelper(0, EnemyPig)
     CaseHelper(1, EnemyMonster)
     CaseHelper(2, EnemyHealer)
     CaseHelper(3, EnemyAntiTower)
@@ -99,7 +99,7 @@ void Enemy::Update(GameWindow *gameWindow)
         _status = Moving;   //畏战敌人无攻击行为
     else if(_status != Fighting || !_target || !_target->IsAlive())   //如果在战斗中则不寻找新的状态
     {
-        Hero* barrierFU = gameWindow->FindOneLivingHeroInRange(this->x(), this->y(), _attackRange);
+        Hero* barrierFU = gameWindow->FindOneHeroInRange(this->x(), this->y(), _attackRange);
         if(barrierFU)
         {
             _status = Fighting;
@@ -131,7 +131,7 @@ void Enemy::Update(GameWindow *gameWindow)
         }
     }
     //调用特殊能力
-    //SpecialAbility(gameWindow);
+    SpecialAbility(gameWindow);
     //Update Status
     DrawHealthLine();
 }

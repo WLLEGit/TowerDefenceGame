@@ -12,6 +12,7 @@ class Tower : public QLabel     //塔
 protected:
     int _cost;
     int _level;
+    int _maxLevel;
     int _range;
     double _attack;
     double _attackInterval;
@@ -27,8 +28,12 @@ protected:
 
     bool _toAttack;
 
+    bool _canAttackFly;
+    bool _canPlaceGuarder;
+
 protected:
     inline bool InRange(int x, int y);
+    void LoadConfig(QString towerName);
     void Attack(GameWindow* gameWindow);
 
 public:
@@ -37,10 +42,8 @@ public:
     void Upgrade(); //升级
     inline Cell* GetPositionCell(){return _posCell;}
     inline int Level(){return _level;}
-    virtual int Type() {return 0;}
 
     void mousePressEvent(QMouseEvent *ev) override;
-
 
     int Cost(){return _cost;}
 
@@ -51,19 +54,16 @@ signals:
 
 };
 
-class ArrowTower : public Tower     //箭塔
-{
-public:
-    ArrowTower(QWidget* parent, Cell* _posCell);
-    int Type() override{return 1;}
+#define TowerDefineHelper(className)\
+class className : public Tower     \
+{\
+public:\
+    className(QWidget* parent, Cell* _posCell);\
 };
 
-class MissleTower : public Tower    //炮塔
-{
-public:
-    MissleTower(QWidget* parent, Cell* _posCell);
-    int Type()override{return 2;}
-};
+TowerDefineHelper(ArrowTower)
+TowerDefineHelper(MissleTower)
+TowerDefineHelper(GuardTower)
 
 
 class Bullet : public QLabel        //子弹

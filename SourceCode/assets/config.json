@@ -1,4 +1,8 @@
 {
+    "FPS":30,
+    "CELLWIDTH":65,
+    "MAPID":1,
+    "ROUNDID":1,
     "Enemies":{
         "EnemyFly1":{
             "maxHealth":20,
@@ -78,6 +82,68 @@
         }
     },
     "Heros":{
+        "Warrior":{
+            "maxHealth":30,
+            "maxCapacity":3,
+            "attack":5,
+            "attackInterval":0.5,
+            "name":"one_r",
+            "range":1,
+            "cost":200,
+            "picInterval":0.4,
+            "maxIndex":4,
+            "isAttackAll":false,
+            "canAttackFly" : false
+        },
+        "Magician":{
+            "maxHealth":15,
+            "maxCapacity":1,
+            "attack":8,
+            "attackInterval":1,
+            "name":"two_r",
+            "range":1.5,
+            "cost":200,
+            "picInterval":0.4,
+            "maxIndex":4,
+            "isAttackAll":false,
+            "canAttackFly" : true
+        },
+        "Spikeweed":{
+            "maxHealth":10000,
+            "maxCapacity":0,
+            "attack":5,
+            "attackInterval":0.5,
+            "name":"Spikeweed_",
+            "range":1,
+            "cost":300,
+            "picInterval":0.05263,
+            "maxIndex":19,
+            "isAttackAll":true,
+            "canAttackFly" : false
+        },
+        "WallNut":{
+            "maxHealth":100,
+            "maxCapacity":5,
+            "attack":0,
+            "attackInterval":100,
+            "name":"WallNut_",
+            "range":1,
+            "cost":200,
+            "picInterval":0.0625,
+            "maxIndex":16,
+            "isAttackAll":false,
+            "canAttackFly" : false
+        }
+    },
+    "Towers":{
+        "ArrowTower":{
 
+        },
+        "MissleTower":{
+
+        },
+        "GuardTower":{
+            
+        }
     }
 }

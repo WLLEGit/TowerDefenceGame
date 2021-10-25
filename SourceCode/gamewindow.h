@@ -113,9 +113,9 @@ public:
     QVector<Hero*> FindAllHerosInRange(int x, int y, int range);
     QVector<Tower*> FindAllTowersInRange(int x, int y, int range);
 
-    Enemy* FindOneLivingEnemyInRange(int x, int y, int range);
-    Hero* FindOneLivingHeroInRange(int x, int y, int range);
-    Tower* FindOneLivingTowerInRange(int x, int y, int range);
+    Enemy* FindOneEnemyInRange(int x, int y, int range);
+    Hero* FindOneHeroInRange(int x, int y, int range);
+    Tower* FindOneTowerInRange(int x, int y, int range);
 
 
     friend void Enemy::Update(GameWindow*);
