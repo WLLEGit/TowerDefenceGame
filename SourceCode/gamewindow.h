@@ -89,10 +89,6 @@ private:
     void OnHeroPressed(Hero*);
     void OnBulletHitEnemy(Bullet*);
 
-    Hero* CreateHero(int type, Cell* cell);
-    Tower* CreateTower(int type, Cell* cell);
-    Enemy* CreateEnemy(int type, Cell* cell, Cell::CellType cellType);
-
     void UpdateResource();
 
 
@@ -119,6 +115,9 @@ public:
 
     Cell* FindOnePathCellInRange(int x, int y, int range, int isFly=false);
 
+    Hero* CreateHero(int type, Cell* cell);
+    Tower* CreateTower(int type, Cell* cell);
+    Enemy* CreateEnemy(int type, Cell* cell, Cell::CellType cellType);
 
     friend void Enemy::Update();
     friend void Tower::Update();

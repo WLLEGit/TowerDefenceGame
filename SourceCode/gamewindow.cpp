@@ -526,14 +526,9 @@ void GameWindow::UpdateResource()
 QVector<className *> GameWindow::FindAll##str##InRange(int x, int y, int range)\
 {\
     QVector<className *> res;\
-    for(auto& tar : vec)\
-    {\
-        if(tar->IsAlive() && DISTANCE(x-tar->x(), y-tar->y()) <= range)\
-            res.push_back(tar);\
-    }\
+    std::copy_if(vec.begin(), vec.end(), std::back_inserter(res), [=](className* tar){return tar->IsAlive() && DISTANCE(x-tar->x(), y-tar->y()) <= range;});\
     return res;\
 }
-
 FindAllHelper(Enemy, Enemies, _enemies)
 FindAllHelper(Hero, Heros, _heros)
 FindAllHelper(Tower, Towers, _towers)
@@ -541,9 +536,9 @@ FindAllHelper(Tower, Towers, _towers)
 #define FindOneHelper(className, vec)\
 className * GameWindow::FindOne##className##InRange(int x, int y, int range)\
 {\
-    for(auto& tar : vec)\
+    for(className* tar : vec)\
     {\
-        if(DISTANCE(tar->IsAlive() && x-tar->x(), y-tar->y()) <= range)\
+        if(tar->IsAlive() && DISTANCE(x-tar->x(), y-tar->y()) <= range)\
             return tar;\
     }\
     return nullptr;\
@@ -562,13 +557,15 @@ Hero * GameWindow::FindOneHeroInRange(int x, int y, int range)
 
 Cell* GameWindow::FindOnePathCellInRange(int x, int y, int range, int isFly)
 {
+    QVector<Cell *> res;
     for(auto& line: _cells)
         for(auto& cell : line)
         {
             if(DISTANCE(cell->x()-x, cell->y()-y)<=range && (cell->GetCellTypeID()&Cell::Path) && (isFly || cell->GetCellTypeID() != Cell::White))
-                return cell;
+                res.push_back(cell);
         }
-    return nullptr;
+
+    return (res.empty() ? nullptr : res[qrand() % res.size()]);
 }
 
 Cell *GameWindow::GetAt(int r, int c)

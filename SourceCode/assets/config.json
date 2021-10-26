@@ -152,7 +152,7 @@
             "name":"MG",
             "bulletPicPath":":/assets/towers/Bullet_MG.png",
             "bulletSpeed":1,
-            "bulletLength":0.5,
+            "bulletLength":0.2,
             "canAttackFly":false
         },
         "MissileTower":{
@@ -165,7 +165,7 @@
             "name":"Missile_Launcher",
             "bulletPicPath":":/assets/towers/Missile.png",
             "bulletSpeed":1,
-            "bulletLength":0.5,
+            "bulletLength":0.7,
             "canAttackFly":false
         },
         "GuardTower":{
@@ -174,7 +174,7 @@
             "maxLevel":1,
             "range":1,
             "attack":0,
-            "attackInterval":1,
+            "attackInterval":5,
             "name":"GuardTower",
             "bulletPicPath":"",
             "bulletSpeed":0,

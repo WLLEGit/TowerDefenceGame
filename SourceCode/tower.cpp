@@ -20,8 +20,8 @@ void Tower::LoadConfig(QString towerName)
     _attackInterval = towerConfig["attackInterval"].toDouble();
     _towerPicPrefix = QString(":/assets/towers/%1%2.png").arg(towerConfig["name"].toString());
     _bulletPicPath = towerConfig["bulletPicPath"].toString();
-    _bulletSpeed = towerConfig["bulletSpeed"].toDouble();
-    _bulletLength = towerConfig["bulletLength"].toDouble();
+    _bulletSpeed = towerConfig["bulletSpeed"].toDouble() * CELLWIDTH;
+    _bulletLength = towerConfig["bulletLength"].toDouble()*CELLWIDTH;
     _canAttackFly = towerConfig["canAttackFly"].toBool();
 }
 
@@ -45,7 +45,7 @@ void Tower::Attack()
 
 
 Tower::Tower(QWidget* parent, GameWindow* gameWindow, Cell* _posCell)
-    :LivingUnit(parent, gameWindow), _posCell(_posCell)
+    :LivingUnit(parent, gameWindow), gameWindow(gameWindow), _posCell(_posCell)
 {
     setGeometry(_posCell->x(), _posCell->y(), CELLWIDTH*1.2, CELLWIDTH*1.2);
 }
@@ -58,10 +58,11 @@ void Tower::Update()
         {
             _target = gameWindow->FindOneEnemyInRange(x(), y(), _range*CELLWIDTH);
         }
-        if(_target && !_attackTimer->isActive())
+        if(_target)
         {
-            _attackTimer->start(_attackInterval);
             setPixmap(RotatePixmap(_towerpic, _target, this));
+            if(!_attackTimer->isActive())
+                _attackTimer->start(_attackInterval*1000);
         }
     }
     else
@@ -117,7 +118,7 @@ void GuardTower::SpecialAbility()
     {
         Cell* pos = gameWindow->FindOnePathCellInRange(x(), y(), _range*CELLWIDTH);
         if(pos)
-            Hero::GenerateHero(gameWindow, gameWindow, pos, 4);
+            _heroGened = gameWindow->CreateHero(4, pos);
     }
     else if(_heroGened && !_heroGened->IsAlive())
     {
