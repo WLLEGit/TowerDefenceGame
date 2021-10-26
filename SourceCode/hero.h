@@ -13,7 +13,7 @@ public:
     Hero(QWidget* parent=nullptr, GameWindow* gameWindow=nullptr, Cell* _posCell=nullptr);
     Cell* GetPositionCell(){return _posCell;}
 
-    bool CanHoldEnemy(){return IsAlive() && _capacityUsed > 0;}
+    bool CanHoldEnemy(){return IsAlive() && _capacityRemain > 0;}
     void AddEnemy(Enemy* enemy);
     bool RemoveEnemy(Enemy* enemy);
 
@@ -26,10 +26,10 @@ public:
 
     int Cost(){return _cost;}
 
-    void Show(){show(); healthBar->show();}
+    void Show(){show(); _healthBar->show();}
 
 protected:
-    void SwitchPic();
+    void SwitchPic() override;
     void LoadConfig(QString name) override;
     void Attack() override;
     bool InRange(int x, int y);
@@ -42,7 +42,7 @@ protected:
     GameWindow* _gameWindow;
 
     Cell* _posCell;
-    int _capacityUsed;
+    int _capacityRemain;
     int _maxCapacity;
     int _cost;
 
@@ -55,8 +55,6 @@ protected:
 
 
 public:
-    QProgressBar* healthBar;;
-
     void mousePressEvent(QMouseEvent *ev) override;
 
 signals:

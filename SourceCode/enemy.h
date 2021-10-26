@@ -42,7 +42,7 @@ public:
 
 
 protected:
-    void SwithPic() override;
+    void SwitchPic() override;
     void Attack() override;
     void LoadConfig(QString enemyName) override;
     void InitBornLocation(GameWindow* gameWindow, Cell* bornCell, Cell::CellType cellType);

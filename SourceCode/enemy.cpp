@@ -129,18 +129,17 @@ void Enemy::InitBornLocation(GameWindow *gameWindow, Cell *bornCell, Cell::CellT
 {
     _pathType = cellType;
     _path = gameWindow->FindPath(bornCell, cellType);
-    setGeometry(bornCell->x(), bornCell->y(), 0, 0);
-    SwithPic();
+    setGeometry(bornCell->x(), bornCell->y(), CELLWIDTH, CELLWIDTH);
+    SwitchPic();
     _picTimer->start(400);
 }
 
 
-void Enemy::SwithPic()
+void Enemy::SwitchPic()
 {
     _curIndex = (_curIndex + 1) % (_maxIndex);
     QPixmap pix(QString(":/assets/monsters/%1%2.png").arg(_name).arg(_curIndex + ((*_path)[_posIndex+1]->col()-(*_path)[_posIndex]->col() > 0 ? _maxIndex : 0)));
     pix = pix.scaledToHeight(_picHeight);
-    this->resize(pix.width(), pix.height());
     this->setPixmap(pix);
 }
 

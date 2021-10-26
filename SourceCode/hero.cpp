@@ -2,33 +2,23 @@
 
 #include "gamewindow.h"
 Hero::Hero(QWidget *parent, GameWindow* gameWindow, Cell* posCell)
-    :LivingUnit(parent, gameWindow), _posCell(posCell)
+    :LivingUnit(parent, gameWindow), _gameWindow(gameWindow), _posCell(posCell)
 {
     setGeometry(posCell->x(), posCell->y(), CELLWIDTH, CELLWIDTH);
-
     _isDestoried = false;
-
-    _gameWindow = gameWindow;
-
-    _curIndex = 0;
-    _maxIndex = 4;
-
-    _picTimer->start(1000*_picInterval);
-
-    _attackTimer->start(_attackInterval*1000);
 }
 
 void Hero::AddEnemy(Enemy *enemy)
 {
     //assert(_capacityUsed);
-    _capacityUsed--;
+    _capacityRemain--;
     _enemiesHold.push_back(enemy);
 }
 
 bool Hero::RemoveEnemy(Enemy *enemy)
 {
     //assert(capacity < maxCapacity);
-    _capacityUsed++;
+    _capacityRemain++;
     return _enemiesHold.removeOne(enemy);
 }
 
@@ -82,7 +72,7 @@ void Hero::Update()
     if(_curHealth <= 0)
     {
         this->hide();
-        healthBar->hide();
+        _healthBar->hide();
         _isDestoried = true;
         _attackTimer->stop();
         _picTimer->stop();
@@ -112,8 +102,7 @@ void Hero::SwitchPic()
 {
     _curIndex = (_curIndex + 1) % (_maxIndex);
     QPixmap pix(QString(":/assets/heros/%1%2.png").arg(_name).arg(_curIndex));
-    pix = pix.scaledToHeight(CELLWIDTH*0.8);
-    this->resize(pix.width(), pix.height());
+    pix = pix.scaledToWidth(CELLWIDTH*0.8);
     this->setPixmap(pix);
 }
 
@@ -123,7 +112,7 @@ void Hero::LoadConfig(QString name)
     _maxHealth = heroConfig["maxHealth"].toInt();
     _curHealth = _maxHealth;
     _maxCapacity = heroConfig["maxCapacity"].toInt();
-    _capacityUsed = 0;
+    _capacityRemain = _maxCapacity;
     _attack = heroConfig["attack"].toInt();
     _attackInterval = heroConfig["attackInterval"].toDouble();
     _name = heroConfig["name"].toString();
@@ -138,9 +127,12 @@ void Hero::LoadConfig(QString name)
 
 #define HeroConstructorHelper(className)\
 className::className(QWidget *parent, GameWindow* gameWindow, Cell *posCell)\
+    :Hero(parent, gameWindow, posCell)\
 {\
     LoadConfig(#className);\
-    Hero(parent, gameWindow, posCell);\
+    SwitchPic();\
+    _picTimer->start(1000*_picInterval);\
+    _attackTimer->start(_attackInterval*1000);\
 }
 HeroConstructorHelper(Warrior)
 HeroConstructorHelper(Magician)

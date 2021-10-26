@@ -172,7 +172,7 @@
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">image: url(:/assets/towers/GuardTower.png);</string>
+     <string notr="true">image: url(:/assets/towers/GuardTower1.png);</string>
     </property>
     <property name="text">
      <string/>

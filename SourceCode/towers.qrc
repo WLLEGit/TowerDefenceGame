@@ -5,7 +5,6 @@
         <file>assets/towers/Cannon1.png</file>
         <file>assets/towers/Cannon2.png</file>
         <file>assets/towers/Cannon3.png</file>
-        <file>assets/towers/GuardTower.png</file>
         <file>assets/towers/MG1.png</file>
         <file>assets/towers/MG2.png</file>
         <file>assets/towers/MG3.png</file>
@@ -14,5 +13,6 @@
         <file>assets/towers/Missile_Launcher2.png</file>
         <file>assets/towers/Missile_Launcher3.png</file>
         <file>assets/towers/Tower.png</file>
+        <file>assets/towers/GuardTower1.png</file>
     </qresource>
 </RCC>

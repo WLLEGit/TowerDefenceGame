@@ -409,7 +409,7 @@ void GameWindow::UnitSelected(int type)
     if(type == 0)   //reset
     {
         ui->label->setText("");
-        _waitToPlaceType = -1;
+        _waitToPlaceType = 0;
         _waitToCost = 0;
     }
     else if(type == -1) //delete hero
@@ -459,7 +459,7 @@ void GameWindow::OnCellPressed(Cell* cell)
 
 void GameWindow::OnTowerPressed(Tower* tower)
 {
-    if((_waitToPlaceType & 0x20) && ((_waitToPlaceType & 0xf) == tower->Type()) && tower->Level() < TOWERMAXLEVEL)
+    if((_waitToPlaceType & 0x20) && ((_waitToPlaceType & 0xf) == tower->Type()) && tower->Level() < tower->MaxLevel())
     {
         tower->Upgrade();
         _money -= _waitToCost;
@@ -502,7 +502,7 @@ Hero* GameWindow::CreateHero(int type, Cell* cell)
 Tower *GameWindow::CreateTower(int type, Cell *cell)
 {
     Tower* t=Tower::GenerateTower(this, this, cell, type);
-    t->show();
+    t->Show();
     connect(t, &Tower::TowerPressed, this, &GameWindow::OnTowerPressed);
     _towers.push_back(t);
     return t;

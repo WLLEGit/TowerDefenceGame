@@ -13,13 +13,15 @@ LivingUnit::LivingUnit(QWidget *parent, GameWindow *gameWindow)
     _healthBar->setValue(100);
     DrawHealthLine();
 
-    connect(this->_picTimer, &QTimer::timeout, this, &LivingUnit::SwithPic);
+    connect(this->_picTimer, &QTimer::timeout, this, &LivingUnit::SwitchPic);
     connect(this->_attackTimer, &QTimer::timeout, this, &LivingUnit::Attack);
+
+    setAlignment(Qt::AlignCenter);
 }
 
 void LivingUnit::DrawHealthLine()
 {
-    _healthBar->setGeometry(x(), y()-CELLWIDTH/10, CELLWIDTH*0.8, CELLWIDTH/10);
+    _healthBar->setGeometry(x()+CELLWIDTH*0.1, y()-CELLWIDTH/10+(pixmap() ? CELLWIDTH/2-pixmap()->height()/2 : 0), CELLWIDTH*0.8, CELLWIDTH/10);
     _healthBar->setValue((float)_curHealth/_maxHealth * 100);
     _healthBar->update();
 }

@@ -1,6 +1,10 @@
 #include "header.h"
 
 QJsonObject globalConfig;
+int CELLWIDTH;
+int FPS;
+int MAPID;
+int ROUNDID;
 
 QImage MergeImage(const QImage& baseImage, const QImage& overlayImage)  //合并两张图片
 {
@@ -48,4 +52,8 @@ void ReadConfigFromJsonFile()
     }
 
     globalConfig = jdc.object();
+    FPS = globalConfig["FPS"].toInt();
+    CELLWIDTH = globalConfig["CELLWIDTH"].toInt();
+    MAPID = globalConfig["MAPID"].toInt();
+    ROUNDID = globalConfig["ROUNDID"].toInt();
 }

@@ -25,7 +25,6 @@ protected:
     int _bulletLength;   //子弹长度
 
     bool _canAttackFly;
-    bool _canPlaceGuarder;
 
 protected:
     inline bool InRange(int x, int y);
@@ -43,6 +42,7 @@ public:
 
     int Cost(){return _cost;}
     virtual int Type(){return -1;}
+    int MaxLevel(){return _maxLevel;}
 
     static Tower* GenerateTower(QWidget* parent, GameWindow* gameWindow, Cell* _posCell, int type);
 
@@ -62,7 +62,7 @@ public:\
 };
 
 TowerDefineHelper(ArrowTower, 1)
-TowerDefineHelper(MissleTower, 2)
+TowerDefineHelper(MissileTower, 2)
 TowerDefineHelper(GuardTower, 3)
 
 

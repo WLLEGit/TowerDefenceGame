@@ -39,7 +39,7 @@ public:
     void Show(){this->show(); _healthBar->show();}
 
 protected:
-    virtual void SwithPic(){}
+    virtual void SwitchPic(){}
     virtual void Attack(){}
     void DrawHealthLine();
     virtual void LoadConfig(QString){}

@@ -18,12 +18,11 @@ void Tower::LoadConfig(QString towerName)
     _range = towerConfig["range"].toDouble();
     _attack = towerConfig["attack"].toInt();
     _attackInterval = towerConfig["attackInterval"].toDouble();
-    _towerPicPrefix = towerConfig["name"].toString();
+    _towerPicPrefix = QString(":/assets/towers/%1%2.png").arg(towerConfig["name"].toString());
     _bulletPicPath = towerConfig["bulletPicPath"].toString();
     _bulletSpeed = towerConfig["bulletSpeed"].toDouble();
     _bulletLength = towerConfig["bulletLength"].toDouble();
     _canAttackFly = towerConfig["canAttackFly"].toBool();
-    _canPlaceGuarder = towerConfig["canPlaceGuarder"].toBool();
 }
 
 void Tower::Attack()
@@ -89,7 +88,7 @@ Tower *Tower::GenerateTower(QWidget *parent, GameWindow *gameWindow, Cell *posCe
     if(type == 1)
         return new ArrowTower(parent, gameWindow, posCell);
     else if(type == 2)
-        return new MissleTower(parent, gameWindow, posCell);
+        return new MissileTower(parent, gameWindow, posCell);
     else if(type == 3)
         return new GuardTower(parent, gameWindow, posCell);
     return nullptr;
@@ -106,11 +105,11 @@ className::className(QWidget *parent, GameWindow* gameWindow, Cell* locationCell
 }
 
 TowerConstructorHelper(ArrowTower)
-TowerConstructorHelper(MissleTower)
+TowerConstructorHelper(MissileTower)
 TowerConstructorHelper(GuardTower)
 
 void ArrowTower::SpecialAbility(){}
-void MissleTower::SpecialAbility(){}
+void MissileTower::SpecialAbility(){}
 void GuardTower::SpecialAbility()
 {
     //放置防卫英雄
